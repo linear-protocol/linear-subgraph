@@ -1,0 +1,26 @@
+type Account @entity{
+   id: ID!
+   height: BigInt!
+   StartTime: String!
+   StakedNEAR: BigInt
+   MintedLinear: BigInt
+   UnstakeLinear: BigInt
+   UnstakeGetNear: BigInt
+   FeesPayed: BigInt
+   Earned1: BigInt 
+   Earned2: BigInt 
+}
+
+
+type Price @entity{
+   id: ID!
+   timeStamp: String!
+   price: BigInt!
+}
+
+
+type LpApy @entity{
+    id: ID!
+    timeStamp: String!
+    feesPayed: BigInt! 
+}
