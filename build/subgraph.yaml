@@ -9,7 +9,7 @@ dataSources:
     network: near-testnet
     source:
       account: linear-protocol.testnet
-      startBlock: 84652739
+      startBlock: 84652738
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript

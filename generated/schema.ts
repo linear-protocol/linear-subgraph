@@ -132,6 +132,108 @@ export class Account extends Entity {
     }
   }
 
+  get DepositedNEAR(): BigInt | null {
+    let value = this.get("DepositedNEAR");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set DepositedNEAR(value: BigInt | null) {
+    if (!value) {
+      this.unset("DepositedNEAR");
+    } else {
+      this.set("DepositedNEAR", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get WithDrawedNEAR(): BigInt | null {
+    let value = this.get("WithDrawedNEAR");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set WithDrawedNEAR(value: BigInt | null) {
+    if (!value) {
+      this.unset("WithDrawedNEAR");
+    } else {
+      this.set("WithDrawedNEAR", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get UnstakeBalance(): BigInt | null {
+    let value = this.get("UnstakeBalance");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set UnstakeBalance(value: BigInt | null) {
+    if (!value) {
+      this.unset("UnstakeBalance");
+    } else {
+      this.set("UnstakeBalance", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get LinearBalance(): BigInt | null {
+    let value = this.get("LinearBalance");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set LinearBalance(value: BigInt | null) {
+    if (!value) {
+      this.unset("LinearBalance");
+    } else {
+      this.set("LinearBalance", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get TransferedOut(): BigInt | null {
+    let value = this.get("TransferedOut");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set TransferedOut(value: BigInt | null) {
+    if (!value) {
+      this.unset("TransferedOut");
+    } else {
+      this.set("TransferedOut", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get TransferedIn(): BigInt | null {
+    let value = this.get("TransferedIn");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set TransferedIn(value: BigInt | null) {
+    if (!value) {
+      this.unset("TransferedIn");
+    } else {
+      this.set("TransferedIn", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
   get FeesPayed(): BigInt | null {
     let value = this.get("FeesPayed");
     if (!value || value.kind == ValueKind.NULL) {
@@ -190,7 +292,8 @@ export class Price extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("timeStamp", Value.fromString(""));
-    this.set("price", Value.fromBigInt(BigInt.zero()));
+    this.set("LinearNum", Value.fromBigInt(BigInt.zero()));
+    this.set("NEARNum", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -228,13 +331,22 @@ export class Price extends Entity {
     this.set("timeStamp", Value.fromString(value));
   }
 
-  get price(): BigInt {
-    let value = this.get("price");
+  get LinearNum(): BigInt {
+    let value = this.get("LinearNum");
     return value!.toBigInt();
   }
 
-  set price(value: BigInt) {
-    this.set("price", Value.fromBigInt(value));
+  set LinearNum(value: BigInt) {
+    this.set("LinearNum", Value.fromBigInt(value));
+  }
+
+  get NEARNum(): BigInt {
+    let value = this.get("NEARNum");
+    return value!.toBigInt();
+  }
+
+  set NEARNum(value: BigInt) {
+    this.set("NEARNum", Value.fromBigInt(value));
   }
 }
 
