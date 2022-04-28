@@ -1,7 +1,7 @@
 {
-  "name": "example",
+  "name": "linear-subgraph",
   "version": "0.1.0",
-  "repository": "https://github.com/graphprotocol/example-subgraph",
+  "repository": "https://github.com/linear-protocol/linear-subgraph",
   "license": "MIT",
   "scripts": {
     "create": "graph create example --node https://api.thegraph.com/deploy/",
@@ -9,17 +9,24 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "deploy": "graph deploy example --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy-local": "graph deploy example --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "deploy-local": "graph deploy example --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "query-price": "node query.js getPrice",
+    "query-apy": "node query.js getApy",
+    "query-reward": "node query.js getReward"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.23.2",
     "@graphprotocol/graph-ts": "^0.23.1"
   },
   "dependencies": {
-    "@apollo/client": "^3.5.8",
+    "@apollo/client": "^3.5.10",
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
-    "graphql": "^16.3.0",
+    "big.js": "^6.1.1",
+    "bignumber.js": "^9.0.2",
+    "graphql": "^16.4.0",
+    "isomorphic-unfetch": "^3.1.0",
+    "node-fetch": "^3.2.3",
     "react": "^17.0.2",
     "truffle": "^5.0.4",
     "truffle-contract": "^4.0.5",

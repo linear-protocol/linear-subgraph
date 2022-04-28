@@ -83,6 +83,7 @@ async function getUserIncome1(accoutd) {
       StakedNEAR
       UnstakeLinear
       UnstakeGetNear
+      FeesPayed
     }
   }`
   let finalQuery = getIncomeQuery1 + String(targetAccount) + getIncomeQuery2
