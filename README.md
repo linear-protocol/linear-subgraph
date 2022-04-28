@@ -34,3 +34,8 @@ xxx.testnet
 current price:  1.016043489065001774757570094662082
 -8.30369755887065801767001839614409258608899161186572321678e+23
 ```
+```
+➜  linear-subgraph npm run query-stake-time xxx.testnet
+xxx.testnet
+user first stake time:  2022-04-17T15:35:00.547Z
+```

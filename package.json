@@ -13,7 +13,8 @@
     "query-price": "node query.js getPrice",
     "query-apy": "node query.js getApy",
     "query-reward-with-fees": "node query.js getRewardWithFeesPayed",
-    "query-reward-without-fees": "node query.js getRewardWithoutFeesPayed"
+    "query-reward-without-fees": "node query.js getRewardWithoutFeesPayed",
+    "query-stake-time": "node query.js getStakeTime"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.23.2",

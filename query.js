@@ -8,7 +8,31 @@ require('process')
 const client = createClient({
   url: APIURL,
 })
+async function queryStakeTime(accountid){
+  const getStakeTimeQuery1 = `
+    query {
+      accounts (fisrt: 1, where: {id: "`
 
+  const getStakeTimeQuery2= `"} ){
+      id
+      StartTime
+    }
+  }`
+  let finalQuery = getStakeTimeQuery1 + String(accountid) + getStakeTimeQuery2
+  //console.log(finalQuery)
+  let data = await client.query(finalQuery).toPromise()
+  let queryData = data.data
+  if (queryData == null){
+    console.log("fail to query price")
+    return
+  }
+  let timeStampInt = new Number(queryData.accounts[0].StartTime.toString())
+  let unixTimeStamp = timeStampInt / 1000000
+  var date = new Date(unixTimeStamp)
+  console.log("user first stake time: ",date)
+  return queryData.accounts[0]
+
+}
 async function queryLatestPrice(){
   const GetLatestQuery = `
     query {
@@ -158,7 +182,10 @@ if (process.argv.length == 4) {
   } else if (callFuntionName == "getRewardWithFeesPayed")  {
       getUserIncomeWithFeesPayed(targetAccount)
       return
-  }else{
+  } else if (callFuntionName == 'getStakeTime'){
+      queryStakeTime(targetAccount)
+      return
+  } else {
       console.log("invalid parameter")
       return
   }
