@@ -4,6 +4,9 @@ const {BigNumber} = require('bignumber.js')
 const APIURL = 'https://api.thegraph.com/subgraphs/name/ha4a4ck/linear'
 require('process')
 
+BigNumber.config({
+  DECIMAL_PLACES: 64
+})
 
 const client = createClient({
   url: APIURL,
@@ -118,14 +121,17 @@ async function getUserIncomeWithoutFeesPayed(accoutd) {
     return
   }
   let LatestPrice = await queryLatestPrice()
-  let price1 = new BigNumber(LatestPrice.price)
-  let mintedLinear = new BigNumber(queryData.MintedLinear)
-  let StakedNEAR = new BigNumber(queryData.StakedNEAR)
-  let unstakedLinear = new BigNumber(queryData.UnstakeLinear)
-  let unstakedGetNEAR = new BigNumber(queryData.UnstakeGetNear)
-  let reward1 = mintedLinear.times(price1).minus(StakedNEAR)
-  let reward2 = unstakedLinear.times(price1).minus(unstakedGetNEAR)
-  let reward = reward1.minus(reward2)
+
+  const price1 = new BigNumber(LatestPrice.price)
+  const mintedLinear = new BigNumber(queryData.MintedLinear)
+  const StakedNEAR = new BigNumber(queryData.StakedNEAR)
+  const unstakedLinear = new BigNumber(queryData.UnstakeLinear)
+  const unstakedGetNEAR = new BigNumber(queryData.UnstakeGetNear)
+
+  const currentLinear = mintedLinear.minus(unstakedLinear);
+  const reward = currentLinear.times(price1).integerValue()
+    .minus(StakedNEAR).plus(unstakedGetNEAR);
+
   console.log(reward.toString())
   return reward
 }
