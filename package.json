@@ -12,7 +12,8 @@
     "deploy-local": "graph deploy example --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
     "query-price": "node query.js getPrice",
     "query-apy": "node query.js getApy",
-    "query-reward": "node query.js getReward"
+    "query-reward-with-fees": "node query.js getRewardWithFeesPayed",
+    "query-reward-without-fees": "node query.js getRewardWithoutFeesPayed"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.23.2",

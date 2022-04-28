@@ -22,8 +22,15 @@ apy:  0.24061968
 ```
 ### reward
 ```
-➜  linear-subgraph git:(master) ✗ npm run query-reward xxx.testnet 
+➜  linear-subgraph npm run query-reward-with-fees xxx.testnet 
 xxx.testnet
-current price:  1.014600270592324547860091872901709
-2.686232441115759019967320289808995893490975865947665006e+21
+current price:  1.016043489065001774757570094662082
+-1.759572366706130126747750839614409258608899161186572321678e+24
+```
+
+```
+➜  linear-subgraph npm run query-reward-without-fees xxx.testnet   
+xxx.testnet
+current price:  1.016043489065001774757570094662082
+-8.30369755887065801767001839614409258608899161186572321678e+23
 ```

@@ -69,7 +69,44 @@ async function calcApy(){
 
 }
 
-async function getUserIncome1(accoutd) {
+async function getUserIncomeWithoutFeesPayed(accoutd) {
+
+  let getIncomeQuery1 = `
+    query {
+      accounts (fisrt: 1, where: {id: "`
+
+  let targetAccount = accoutd
+
+  let getIncomeQuery2= `"} ){
+      id
+      MintedLinear
+      StakedNEAR
+      UnstakeLinear
+      UnstakeGetNear
+    }
+  }`
+  let finalQuery = getIncomeQuery1 + String(targetAccount) + getIncomeQuery2
+  //console.log(finalQuery)
+  let data = await client.query(finalQuery).toPromise()
+  let queryData = data.data.accounts[0]
+  if (queryData == null){
+    console.log("fail to query user")
+    return
+  }
+  let LatestPrice = await queryLatestPrice()
+  let price1 = new BigNumber(LatestPrice.price)
+  let mintedLinear = new BigNumber(queryData.MintedLinear)
+  let StakedNEAR = new BigNumber(queryData.StakedNEAR)
+  let unstakedLinear = new BigNumber(queryData.UnstakeLinear)
+  let unstakedGetNEAR = new BigNumber(queryData.UnstakeGetNear)
+  let reward1 = mintedLinear.times(price1).minus(StakedNEAR)
+  let reward2 = unstakedLinear.times(price1).minus(unstakedGetNEAR)
+  let reward = reward1.minus(reward2)
+  console.log(reward.toString())
+  return reward
+}
+
+async function getUserIncomeWithFeesPayed(accoutd) {
 
   let getIncomeQuery1 = `
     query {
@@ -100,21 +137,30 @@ async function getUserIncome1(accoutd) {
   let StakedNEAR = new BigNumber(queryData.StakedNEAR)
   let unstakedLinear = new BigNumber(queryData.UnstakeLinear)
   let unstakedGetNEAR = new BigNumber(queryData.UnstakeGetNear)
+  let fessPayed = new BigNumber(queryData.FeesPayed)
   let reward1 = mintedLinear.times(price1).minus(StakedNEAR)
   let reward2 = unstakedLinear.times(price1).minus(unstakedGetNEAR)
   let reward = reward1.minus(reward2)
-  console.log(reward.toString())
+  let rewardFinal = reward.minus(fessPayed)
+  console.log(rewardFinal.toString())
   return reward
 }
+
+
 if (process.argv.length == 4) {
   var arguments = process.argv.splice(2);
   const callFuntionName = arguments[0];
   const targetAccount = arguments[1];
   console.log(targetAccount)
-  if (callFuntionName == "getReward") {
-      getUserIncome1(targetAccount)
-  } else {
+  if (callFuntionName == "getRewardWithoutFeesPayed") {
+      getUserIncomeWithoutFeesPayed(targetAccount)
+      return
+  } else if (callFuntionName == "getRewardWithFeesPayed")  {
+      getUserIncomeWithFeesPayed(targetAccount)
+      return
+  }else{
       console.log("invalid parameter")
+      return
   }
 }
 
