@@ -171,7 +171,7 @@ async function getUserIncomeWithFeesPayed(accoutd) {
   let reward1 = mintedLinear.times(price1).minus(StakedNEAR)
   let reward2 = unstakedLinear.times(price1).minus(unstakedGetNEAR)
   let reward = reward1.minus(reward2)
-  let rewardFinal = reward.minus(fessPayed)
+  let rewardFinal = reward.plus(fessPayed)
   console.log(rewardFinal.toString())
   return reward
 }
