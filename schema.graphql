@@ -1,0 +1,38 @@
+type Account @entity{
+   id: ID!
+   height: BigInt!
+   StartTime: String!
+   StakedNEAR: BigInt 
+   MintedLinear: BigInt 
+   UnstakeLinear: BigInt 
+   UnstakeGetNear: BigInt 
+   DepositedNEAR: BigInt
+   WithDrawedNEAR: BigInt
+   UnstakeBalance: BigInt
+   LinearBalance: BigInt 
+   TransferedOut: BigInt
+   TransferedIn: BigInt
+   FeesPayed: BigInt
+   Earned1: BigInt 
+   Earned2: BigInt 
+}
+ 
+
+type Price @entity{
+   id: ID!
+   timeStamp: String!
+   LinearNum: BigDecimal!
+   NEARNum: BigDecimal!
+   price: BigDecimal!
+}
+
+type LpApy @entity{
+    id: ID!
+    timeStamp: String!
+    feesPayed: BigInt! 
+}
+
+type LpApyFlag @entity {
+    id: ID!
+    LastApyId: Int!
+}
