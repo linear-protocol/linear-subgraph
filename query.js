@@ -252,9 +252,9 @@ async function getUserIncome(accountId,flag) {
   }
 }
 // calcStakePoolApy()
-// queryStakeTime("dravenlu.testnet")
-// getUserIncome("dravenlu.testnet",true)
-// getUserIncome("dravenlu.testnet",false)
+// queryStakeTime("goldman.testnet")
+// getUserIncome("goldman.testnet",true)
+// getUserIncome("goldman.testnet",false)
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()
