@@ -16,9 +16,6 @@ BigNumber.config({
   DECIMAL_PLACES: 64
 })
 
-
-
-
 const configs = {
     networkId: "testnet",
     keyStore, // optional if not signing transactions
@@ -49,7 +46,6 @@ async function getSummaryFromContract(){
   console.log(response);
   return response
 }
-
 
 async function  getLatestFeesPayed() {
   const GetLatestQuery = `
@@ -95,7 +91,6 @@ async function getTargetTimeFeesPayed(timeStamp) {
 }
 
 async function calcCurrentLpTVL() {
-  
   const near = await connect(configs);
   const account = await near.account("draven.testnet");
   const contract = new nearAPI.Contract(
@@ -108,7 +103,6 @@ async function calcCurrentLpTVL() {
       //, // account object to initialize and sign transactions.
     }
   );
-  
   let response = await contract.get_summary();
   const tmpLinearShares = new BigNumber(response.lp_staked_share)
   const tmpNEARShares = new BigNumber(response.lp_near_amount)
@@ -128,9 +122,6 @@ async function calcCurrentLpTVL() {
   console.log("final lp apy is ",lpApy.toString());
   
 }
-
-
-
 
 async function queryStakeTime(accountid){
   const getStakeTimeQuery = `
@@ -174,8 +165,6 @@ async function queryLatestPrice(){
   return queryData.prices[0]
 }
 
-
-
 async function queryBefore(timeStamp){
   const targetTime = Number(timeStamp) - 30 * 24 * 60 * 60 * 1000000000
   const getBeforeQuery = `
@@ -197,7 +186,6 @@ async function queryBefore(timeStamp){
   return queryData.prices[0]
 }
 
-
 async function calcStakePoolApy(){
   let latesdPrice = await queryLatestPrice()
   let threeMonthsBefore = await queryBefore(latesdPrice.timeStamp)
@@ -210,10 +198,7 @@ async function calcStakePoolApy(){
   console.log("apy: ",apy.toString())
 }
 
-
-
 async function getUserIncome(accountId,flag) {
-
   let getIncomeQuery = `
     query {
       accounts (fisrt: 1, where: {id: "${accountId}"} ){
@@ -258,7 +243,7 @@ async function getUserIncome(accountId,flag) {
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()
- calcCurrentLpTVL()
+// calcCurrentLpTVL()
 
 
 // if (process.argv.length == 4) {
