@@ -54,7 +54,7 @@ async function getSummaryFromContract(){
 async function  getLatestFeesPayed() {
   const GetLatestQuery = `
   query {
-    lpApies (fisrt: 1, orderBy: timeStamp, orderDirection: desc){
+    lpApies (first: 1, orderBy: timeStamp, orderDirection: desc){
       id
       timeStamp
       feesPayed
@@ -73,10 +73,10 @@ async function  getLatestFeesPayed() {
 
 async function getTargetTimeFeesPayed(timeStamp) {
   // 3 days before
-  const targetTimeForFees = timeStamp - 3 * 24 * 60 * 60 * 1000000000
+  const targetTimeForFees = timeStamp - 6 * 24 * 60 * 60 * 1000000000
   const getBeforeFeesPayed = `
     query {
-      lpApies (fisrt: 1, where: {timeStamp_gt: "${targetTimeForFees}"} ){
+      lpApies (first: 1, where: {timeStamp_gt: "${targetTimeForFees}"} ){
         id
         feesPayed
         timeStamp
@@ -89,7 +89,8 @@ async function getTargetTimeFeesPayed(timeStamp) {
     console.log("fail to query before lpApies")
     return
   }
-  console.log("init fees: ",queryData.lpApies[0].fessPayed.toString())
+  console.log(queryData)
+  console.log("init fees: ",queryData.lpApies[0].feesPayed)
   return queryData.lpApies[0]
 }
 
@@ -111,17 +112,20 @@ async function calcCurrentLpTVL() {
   let response = await contract.get_summary();
   const tmpLinearShares = new BigNumber(response.lp_staked_share)
   const tmpNEARShares = new BigNumber(response.lp_near_amount)
-  const tmpPrice = new BigNumber(response.ft_price)
+  const tmpPrice = new BigNumber(response.ft_price).div(1000000000000000000000000)
   const tmpLpTVL = tmpLinearShares.times(tmpPrice).plus(tmpNEARShares)
+  console.log("tmpLpTVL",tmpLpTVL)
   const tmpFeesPayed = await getLatestFeesPayed()
   const initFeesPayed = await getTargetTimeFeesPayed(tmpFeesPayed.timeStamp)
   const secsCurrent = new BigNumber(tmpFeesPayed.timeStamp)
   const secsInit = new BigNumber(initFeesPayed.timeStamp)
   const days = secsCurrent.minus(secsInit).div(24).div(60*60).div(1000000000)
-  const feesCurrent = new BigNumber(tmpFeesPayed.fessPayed)
-  const feesInit = new BigNumber(initFeesPayed.fessPayed)
+  console.log("days ",days)
+  const feesCurrent = new BigNumber(tmpFeesPayed.feesPayed)
+  const feesInit = new BigNumber(initFeesPayed.feesPayed)
+  console.log("feesCurrent,feesInit",feesCurrent,feesInit)
   const lpApy = feesCurrent.minus(feesInit).div(days).times(365).times(tmpPrice).div(tmpLpTVL)
-  console.log("final lp apy is ",lpApy);
+  console.log("final lp apy is ",lpApy.toString());
   
 }
 
