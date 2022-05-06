@@ -1,20 +1,18 @@
 type Account @entity{
    id: ID!
    height: BigInt!
-   StartTime: String!
-   StakedNEAR: BigInt 
-   MintedLinear: BigInt 
-   UnstakeLinear: BigInt 
-   UnstakeGetNear: BigInt 
-   DepositedNEAR: BigInt
-   WithDrawedNEAR: BigInt
-   UnstakeBalance: BigInt
-   LinearBalance: BigInt 
-   TransferedOut: BigInt
-   TransferedIn: BigInt
-   FeesPayed: BigInt
-   Earned1: BigInt 
-   Earned2: BigInt 
+   startTime: String!
+   stakedNEAR: BigInt 
+   mintedLinear: BigInt 
+   unstakeLinear: BigInt 
+   unstakeGetNear: BigInt 
+   depositedNEAR: BigInt
+   withDrawedNEAR: BigInt
+   unstakeBalance: BigInt
+   linearBalance: BigInt 
+   transferedOut: BigInt
+   transferedIn: BigInt
+   feesPayed: BigInt
 }
  
 

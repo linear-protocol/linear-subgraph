@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 description: Sub-graph for LiNEAR
-repository: hack
+repository: https://github.com/linear-protocol/linear-subgraph
 schema:
   file: ./schema.graphql
 dataSources:

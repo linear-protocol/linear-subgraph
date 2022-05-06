@@ -8,9 +8,6 @@ const fs = require("fs");
 const {connect} = nearAPI
 const { keyStores,  KeyPair} = require("near-api-js");
 const keyStore = new keyStores.InMemoryKeyStore();
-const KEY_PATH = './dravenlu.testnet.json';
-const credentials = JSON.parse(fs.readFileSync(KEY_PATH));
-keyStore.setKey("testnet", "draven.testnet", KeyPair.fromString(credentials.private_key));
 
 BigNumber.config({
   DECIMAL_PLACES: 64
@@ -31,7 +28,7 @@ const client = createClient({
 
 async function getSummaryFromContract(){
   const near = await connect(configs);
-  const account = await near.account("draven.testnet");
+  const account = await near.account("");
   const contract = new nearAPI.Contract(
     account, // the account object that is connecting
     "linear-protocol.testnet",
@@ -43,21 +40,21 @@ async function getSummaryFromContract(){
     }
   );
   let response = await contract.get_summary();
-  console.log(response);
+  //console.log(response);
   return response
 }
 
 async function  getLatestFeesPayed() {
-  const GetLatestQuery = `
-  query {
-    lpApies (first: 1, orderBy: timeStamp, orderDirection: desc){
-      id
-      timeStamp
-      feesPayed
+  const getLatestQuery = `
+    query {
+      lpApies (first: 1, orderBy: timeStamp, orderDirection: desc){
+        id
+        timeStamp
+        feesPayed
+      }
     }
-  }
   `
-  let data = await client.query(GetLatestQuery).toPromise()
+  let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null){
     console.log("fail to query latest lpApies")
@@ -69,7 +66,7 @@ async function  getLatestFeesPayed() {
 
 async function getTargetTimeFeesPayed(timeStamp) {
   // 3 days before
-  const targetTimeForFees = timeStamp - 6 * 24 * 60 * 60 * 1000000000
+  const targetTimeForFees = timeStamp - 10 * 24 * 60 * 60 * 1000000000
   const getBeforeFeesPayed = `
     query {
       lpApies (first: 1, where: {timeStamp_gt: "${targetTimeForFees}"} ){
@@ -78,49 +75,36 @@ async function getTargetTimeFeesPayed(timeStamp) {
         timeStamp
      }
   }`
-  console.log(getBeforeFeesPayed)
+  //console.log(getBeforeFeesPayed)
   let data = await client.query(getBeforeFeesPayed).toPromise()
   let queryData = data.data
   if (queryData == null){
     console.log("fail to query before lpApies")
     return
   }
-  console.log(queryData)
+  //console.log(queryData)
   console.log("init fees: ",queryData.lpApies[0].feesPayed)
   return queryData.lpApies[0]
 }
 
 async function calcCurrentLpTVL() {
-  const near = await connect(configs);
-  const account = await near.account("draven.testnet");
-  const contract = new nearAPI.Contract(
-    account, // the account object that is connecting
-    "linear-protocol.testnet",
-    {
-      // name of contract you're connecting to
-      viewMethods: ["get_summary"], // view methods do not change state but usually return a value
-      changeMethods: [],// change methods modify state
-      //, // account object to initialize and sign transactions.
-    }
-  );
-  let response = await contract.get_summary();
+  let response = await getSummaryFromContract();
   const tmpLinearShares = new BigNumber(response.lp_staked_share)
   const tmpNEARShares = new BigNumber(response.lp_near_amount)
   const tmpPrice = new BigNumber(response.ft_price).div(1000000000000000000000000)
   const tmpLpTVL = tmpLinearShares.times(tmpPrice).plus(tmpNEARShares)
-  console.log("tmpLpTVL",tmpLpTVL)
+  console.log("tmpLpTVL",tmpLpTVL.toString())
   const tmpFeesPayed = await getLatestFeesPayed()
   const initFeesPayed = await getTargetTimeFeesPayed(tmpFeesPayed.timeStamp)
   const secsCurrent = new BigNumber(tmpFeesPayed.timeStamp)
   const secsInit = new BigNumber(initFeesPayed.timeStamp)
   const days = secsCurrent.minus(secsInit).div(24).div(60*60).div(1000000000)
-  console.log("days ",days)
+  console.log("days ",days.toString())
   const feesCurrent = new BigNumber(tmpFeesPayed.feesPayed)
   const feesInit = new BigNumber(initFeesPayed.feesPayed)
-  console.log("feesCurrent,feesInit",feesCurrent,feesInit)
+  //console.log("feesCurrent,feesInit",feesCurrent,feesInit)
   const lpApy = feesCurrent.minus(feesInit).div(days).times(365).times(tmpPrice).div(tmpLpTVL)
   console.log("final lp apy is ",lpApy.toString());
-  
 }
 
 async function queryStakeTime(accountid){
@@ -128,7 +112,7 @@ async function queryStakeTime(accountid){
     query {
       accounts (fisrt: 1, where: {id: "${accountid}"} ){
       id
-      StartTime
+      startTime
     }
   }`
   console.log(getStakeTimeQuery)
@@ -138,15 +122,15 @@ async function queryStakeTime(accountid){
     console.log("fail to query price")
     return
   }
-  let timeStampInt = new Number(queryData.accounts[0].StartTime.toString())
-  let unixTimeStamp = timeStampInt / 1000000
-  var date = new Date(unixTimeStamp)
+  let timeStampInt = new Number(queryData.accounts[0].startTime.toString())
+  const unixTimeStamp = timeStampInt / 1000000
+  const date = new Date(unixTimeStamp)
   console.log("user first stake time: ",date)
   return queryData.accounts[0]
 }
 
 async function queryLatestPrice(){
-  const GetLatestQuery = `
+  const getLatestQuery = `
     query {
       prices (fisrt: 1, orderBy: id, orderDirection: desc){
         id
@@ -155,7 +139,7 @@ async function queryLatestPrice(){
       }
     }
   `
-  let data = await client.query(GetLatestQuery).toPromise()
+  let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null){
     console.log("fail to query price")
@@ -170,11 +154,11 @@ async function queryBefore(timeStamp){
   const getBeforeQuery = `
     query {
       prices (fisrt: 1, where: {timeStamp_gt: "${targetTime}"} ){
-      id
-      timeStamp
-      price
-    }
-  }`
+        id
+        timeStamp
+        price
+      }
+    }`
   //console.log(getBeforeQuery)
   let data = await client.query(getBeforeQuery).toPromise()
   let queryData = data.data
@@ -187,14 +171,14 @@ async function queryBefore(timeStamp){
 }
 
 async function calcStakePoolApy(){
-  let latesdPrice = await queryLatestPrice()
-  let threeMonthsBefore = await queryBefore(latesdPrice.timeStamp)
-  let price1 = new BigNumber(latesdPrice.price)
-  let price2 = new BigNumber(threeMonthsBefore.price)
+  const latesdPrice = await queryLatestPrice()
+  const threeMonthsBefore = await queryBefore(latesdPrice.timeStamp)
+  const price1 = new BigNumber(latesdPrice.price)
+  const price2 = new BigNumber(threeMonthsBefore.price)
   //console.log(price1, price2)
-  let timeGap = new BigNumber(Number(latesdPrice.timeStamp - threeMonthsBefore.timeStamp))
-  let times1 = new BigNumber(24 * 60 * 60 * 1000000000 * 365)
-  let apy = price1.minus(price2).div(timeGap).times(times1)
+  const timeGap = new BigNumber(Number(latesdPrice.timeStamp - threeMonthsBefore.timeStamp))
+  const times1 = new BigNumber(24 * 60 * 60 * 1000000000 * 365)
+  const apy = price1.minus(price2).div(timeGap).times(times1)
   console.log("apy: ",apy.toString())
 }
 
@@ -202,14 +186,14 @@ async function getUserIncome(accountId,flag) {
   let getIncomeQuery = `
     query {
       accounts (fisrt: 1, where: {id: "${accountId}"} ){
-      id
-      MintedLinear
-      StakedNEAR
-      UnstakeLinear
-      UnstakeGetNear
-      FeesPayed
-    }
-  }`
+        id
+        mintedLinear
+        stakedNEAR
+        unstakeLinear
+        unstakeGetNear
+        feesPayed
+      }
+    }`
   //console.log(finalQuery)
   let data = await client.query(getIncomeQuery).toPromise()
   //console.log(data)
@@ -218,13 +202,13 @@ async function getUserIncome(accountId,flag) {
     console.log("fail to query user")
     return
   }
-  let LatestPrice = await queryLatestPrice()
-  const price1 = new BigNumber(LatestPrice.price)
-  const mintedLinear = new BigNumber(queryData.MintedLinear)
-  const StakedNEAR = new BigNumber(queryData.StakedNEAR)
-  const unstakedLinear = new BigNumber(queryData.UnstakeLinear)
-  const unstakedGetNEAR = new BigNumber(queryData.UnstakeGetNear)
-  const fessPayed = new BigNumber(queryData.FeesPayed)
+  const latestPrice = await queryLatestPrice()
+  const price1 = new BigNumber(latestPrice.price)
+  const mintedLinear = new BigNumber(queryData.mintedLinear)
+  const StakedNEAR = new BigNumber(queryData.stakedNEAR)
+  const unstakedLinear = new BigNumber(queryData.unstakeLinear)
+  const unstakedGetNEAR = new BigNumber(queryData.unstakeGetNear)
+  const fessPayed = new BigNumber(queryData.feesPayed)
   const currentLinear = mintedLinear.minus(unstakedLinear);
   const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR);
   if (flag) {
@@ -244,34 +228,3 @@ async function getUserIncome(accountId,flag) {
 // queryLatestPrice()
 // calcLpApy()
 // calcCurrentLpTVL()
-
-
-// if (process.argv.length == 4) {
-//   var arguments = process.argv.splice(2);
-//   const callFuntionName = arguments[0];
-//   const targetAccount = arguments[1];
-//   console.log(targetAccount)
-//   if (callFuntionName == "getRewardWithoutFeesPayed") {
-//       getUserIncomeWithoutFeesPayed(targetAccount)
-//       return
-//   } else if (callFuntionName == "getRewardWithFeesPayed")  {
-//       getUserIncomeWithFeesPayed(targetAccount)
-//       return
-//   } else if (callFuntionName == 'getStakeTime'){
-//       queryStakeTime(targetAccount)
-//       return
-//   } else {
-//       console.log("invalid parameter")
-//       return
-//   }
-// }
-
-// if (process.argv.length == 3) {
-//   var arguments = process.argv.splice(2);
-//   const callFuntionName = arguments[0];
-//   if (callFuntionName == "getPrice") {
-//       queryLatestPrice()
-//   } else if (callFuntionName == "getApy"){
-//       calcApy()
-//   }
-// }

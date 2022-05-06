@@ -32,7 +32,6 @@
     "react": "^17.0.2",
     "truffle": "^5.0.4",
     "truffle-contract": "^4.0.5",
-    "near-units": "^0.1.9",
     "truffle-hdwallet-provider": "^1.0.4",
     "urql": "^2.1.1"
   }
