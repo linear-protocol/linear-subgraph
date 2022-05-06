@@ -15,6 +15,23 @@ export function handleReceipt(
   }
 }
 
+function checkAndCreateUser(id:string,startTime:string,height:BigInt,mintedLinear:BigInt,stakedNEAR:BigInt,transferIn:BigInt,transferedOut:BigInt,unstakedBalance:BigInt,unstakeGetNear:BigInt,depoitedNEAR:BigInt,withdrawedNEAR:BigInt,feesPayed:BigInt,unstakeLinear:BigInt,linearBalance:BigInt) :void{
+  let user = new Account(id)
+  user.startTime = startTime
+  user.height = height
+  user.mintedLinear = mintedLinear
+  user.stakedNEAR = stakedNEAR
+  user.transferedIn = transferIn
+  user.transferedOut = transferedOut
+  user.unstakeBalance = unstakedBalance
+  user.unstakeGetNear = unstakeGetNear
+  user.depositedNEAR = depoitedNEAR
+  user.withDrawedNEAR = withdrawedNEAR
+  user.feesPayed = feesPayed
+  user.unstakeLinear = unstakeLinear
+  user.linearBalance = linearBalance 
+  user.save()
+}
 
 function handleAction(
   action: near.ActionValue,
@@ -47,28 +64,12 @@ function handleAction(
           const unstakedBalance = dataObj.get('new_unstaked_balance')!.toString()
           let user = Account.load(depositAccount)
           if (user) {
-            user.UnstakeBalance = BigInt.fromString(unstakedBalance)
-            user.DepositedNEAR += BigInt.fromString(depoositAmount)
+            user.unstakeBalance = BigInt.fromString(unstakedBalance)
+            user.depositedNEAR += BigInt.fromString(depoositAmount)
             user.save()
           }else{
             log.info('create user {}',[depositAccount])
-            user = new Account(depositAccount)
-            user.StartTime = timeStamp.toString()
-            user.height = BigInt.fromU64(blockHeight)
-            user.MintedLinear = BigInt.fromU64(0)
-            user.StakedNEAR = BigInt.fromU64(0)
-            user.DepositedNEAR += BigInt.fromString(depoositAmount)
-            user.UnstakeBalance = BigInt.fromString(unstakedBalance)
-            user.UnstakeGetNear = BigInt.fromU64(0)
-            user.LinearBalance  = BigInt.fromU64(0)
-            user.UnstakeLinear = BigInt.fromU64(0)
-            user.FeesPayed = BigInt.fromU64(0)
-            user.WithDrawedNEAR = BigInt.fromU64(0)
-            user.TransferedIn = BigInt.fromU64(0)
-            user.TransferedOut = BigInt.fromU64(0)
-            user.Earned1 = BigInt.fromU64(0)
-            user.Earned2 = BigInt.fromU64(0)
-            user.save()
+            checkAndCreateUser(depositAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0), BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromString(unstakedBalance),BigInt.fromU64(0),BigInt.fromString(depoositAmount),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0))
           }
         }
       }
@@ -98,29 +99,13 @@ function handleAction(
           // update user
           if (!user){
             log.info('create user {}',[account])
-            user = new Account(account)
-            user.StartTime = timeStamp.toString()
-            user.height = BigInt.fromU64(blockHeight)
-            user.MintedLinear = minted_shares
-            user.StakedNEAR = stakeAmount
-            user.UnstakeGetNear = BigInt.fromU64(0)
-            user.UnstakeLinear = BigInt.fromU64(0)
-            user.FeesPayed = BigInt.fromU64(0)
-            user.Earned1 = BigInt.fromU64(0)
-            user.Earned2 = BigInt.fromU64(0)
-            user.LinearBalance = minted_shares
-            user.TransferedOut = BigInt.fromU64(0)
-            user.TransferedIn = BigInt.fromU64(0)
-            user.DepositedNEAR = stakeAmount
-            user.UnstakeBalance = BigInt.fromU64(0)
-            user.WithDrawedNEAR = BigInt.fromU64(0)
-            user.save()
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),minted_shares,stakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),stakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),minted_shares)
           }else {
             log.info('update user {}',[account])
-            user.StakedNEAR += stakeAmount
-            user.MintedLinear += minted_shares
-            user.LinearBalance += minted_shares
-            user.DepositedNEAR += stakeAmount
+            user.stakedNEAR += stakeAmount
+            user.mintedLinear += minted_shares
+            user.linearBalance += minted_shares
+            user.depositedNEAR += stakeAmount
             user.save()
           }
           // update price
@@ -158,8 +143,8 @@ function handleAction(
           const burnedShares = BigInt.fromString(burnedSharesStr)
           let user = Account.load(account)!
           log.info('find {}',['user'])
-          user.UnstakeGetNear += unstakeAmount
-          user.UnstakeLinear += burnedShares
+          user.unstakeGetNear += unstakeAmount
+          user.unstakeLinear += burnedShares
           user.save()
           // update price
           log.info('start handle {}',['price'])
@@ -194,23 +179,7 @@ function handleAction(
           log.info('create {}',['user'])
           // update user
           if (!user){
-            user = new Account(account)
-            user.StartTime = timeStamp.toString()
-            user.height = BigInt.fromU64(blockHeight)
-            user.MintedLinear = BigInt.fromU64(0)
-            user.StakedNEAR = BigInt.fromU64(0)
-            user.UnstakeGetNear = BigInt.fromU64(0)
-            user.UnstakeLinear = BigInt.fromU64(0)
-            user.FeesPayed = BigInt.fromU64(0)
-            user.Earned1 = BigInt.fromU64(0)
-            user.Earned2 = BigInt.fromU64(0)
-            user.DepositedNEAR = BigInt.fromU64(0)
-            user.LinearBalance = BigInt.fromU64(0)
-            user.TransferedIn = BigInt.fromU64(0)
-            user.TransferedOut = BigInt.fromU64(0)
-            user.UnstakeBalance = BigInt.fromU64(0)
-            user.WithDrawedNEAR = BigInt.fromU64(0)
-            user.save()
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0))
           }
         }
       }
@@ -237,58 +206,22 @@ function handleAction(
           let fromUser = Account.load(fromAccount)
           let toUser = Account.load(toAccount)
           if (fromUser){
-            fromUser.TransferedOut += amountInt
+            fromUser.transferedOut += amountInt
             fromUser.save()
           }else{
-            fromUser = new Account(fromAccount)
-            fromUser.StartTime = timeStamp.toString()
-            fromUser.height = BigInt.fromU64(blockHeight)
-            fromUser.MintedLinear = BigInt.fromU32(0)
-            fromUser.StakedNEAR = BigInt.fromU32(0)
-            fromUser.UnstakeGetNear = BigInt.fromU64(0)
-            fromUser.UnstakeLinear = BigInt.fromU64(0)
-            fromUser.FeesPayed = BigInt.fromU64(0)
-            fromUser.Earned1 = BigInt.fromU64(0)
-            fromUser.Earned2 = BigInt.fromU64(0)
-            fromUser.LinearBalance = BigInt.fromU64(0)
-            fromUser.TransferedOut = amountInt
-            fromUser.TransferedIn = BigInt.fromU64(0)
-            fromUser.DepositedNEAR = BigInt.fromU64(0)
-            fromUser.UnstakeBalance = BigInt.fromU64(0)
-            fromUser.WithDrawedNEAR = BigInt.fromU64(0)
-            fromUser.save()
+            checkAndCreateUser(fromAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),amountInt,BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0))
           }
           if (toUser){
-            toUser.TransferedIn += amountInt
+            toUser.transferedIn += amountInt
             toUser.save()
           }else{
-            toUser = new Account(toAccount)
-            toUser.StartTime = timeStamp.toString()
-            toUser.height = BigInt.fromU64(blockHeight)
-            toUser.MintedLinear = BigInt.fromU32(0)
-            toUser.StakedNEAR = BigInt.fromU32(0)
-            toUser.UnstakeGetNear = BigInt.fromU64(0)
-            toUser.UnstakeLinear = BigInt.fromU64(0)
-            toUser.FeesPayed = BigInt.fromU64(0)
-            toUser.Earned1 = BigInt.fromU64(0)
-            toUser.Earned2 = BigInt.fromU64(0)
-            toUser.LinearBalance = BigInt.fromU64(0)
-            toUser.TransferedOut = BigInt.fromU64(0)
-            toUser.TransferedIn = amountInt
-            toUser.DepositedNEAR = BigInt.fromU64(0)
-            toUser.UnstakeBalance = BigInt.fromU64(0)
-            toUser.WithDrawedNEAR = BigInt.fromU64(0)
-            toUser.save()
+            checkAndCreateUser(toAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),amountInt,BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0))
           }
         }
       }
     }
   }
 
-
-// EVENT_JSON:{"standard":"linear","version":"1.0.0","event":"liquidity_pool_swap_fee","data":[{"account_id":"dravte.testnet","stake_shares_in":"19735500000000000000000000","requested_amount":"20000003738785215223896334","received_amount":"19402003626995537288701834","fee_amount":"598000111789677935194500","fee_stake_shares":"590091449999999999999999","treasury_fee_stake_shares":"177027434999999999999999","pool_fee_stake_shares":"413064015000000000000000","total_fee_shares":"3831354640400000000000000"}]}
-// EVENT_JSON:{"standard":"linear","version":"1.0.0","event":"instant_unstake","data":[{"account_id":"dravte.testnet","unstaked_amount":"19402003626995537288701834","swapped_stake_shares":"19735500000000000000000000","new_unstaked_balance":"2","new_stake_shares":"3400378077868412936","fee_amount":"598000111789677935194500"}]}
-// EVENT_JSON:{"standard":"nep141","version":"1.0.0","event":"ft_transfer","data":[{"old_owner_id":"dravte.testnet","new_owner_id":"treasury.linear-protocol.testnet","amount":"177027434999999999999999","memo":"instant unstake treasury fee"},{"old_owner_id":"dravte.testnet","new_owner_id":"linear-protocol.testnet","amount":"19558472565000000000000001","memo":"instant unstake swapped into pool"}]}
   if (methodName == 'instant_unstake' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString()
@@ -319,27 +252,11 @@ function handleAction(
           let user = Account.load(account)!
           log.info('find {}',['user'])
           if (!user) {
-            user = new Account(account)
-            user.StartTime = timeStamp.toString()
-            user.height = BigInt.fromU64(blockHeight)
-            user.MintedLinear = BigInt.fromU64(0)
-            user.StakedNEAR = BigInt.fromU64(0)
-            user.UnstakeGetNear = unstakeAmount
-            user.UnstakeLinear = unstakeLinearAmount
-            user.FeesPayed = feesPayed
-            user.Earned1 = BigInt.fromU64(0)
-            user.Earned2 = BigInt.fromU64(0)
-            user.TransferedOut = BigInt.fromU64(0)
-            user.TransferedIn = BigInt.fromU64(0)
-            user.WithDrawedNEAR = BigInt.fromU64(0)
-            user.UnstakeBalance = BigInt.fromU64(0)
-            user.LinearBalance = BigInt.fromU64(0)
-            user.DepositedNEAR = BigInt.fromU64(0)
-            user.save()
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),unstakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),feesPayed,unstakeLinearAmount,BigInt.fromU64(0))
           }else{
-            user.UnstakeGetNear +=  unstakeAmount
-            user.UnstakeLinear += unstakeLinearAmount
-            user.FeesPayed += feesPayed
+            user.unstakeGetNear +=  unstakeAmount
+            user.unstakeLinear += unstakeLinearAmount
+            user.feesPayed += feesPayed
             user.save()
           }
         }
