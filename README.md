@@ -1,5 +1,6 @@
 # Subgraph for LiNEAR
 [Testnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linear?selected=playground)
+
 [Mainnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linearmainnet?selected=playground)
 
 ## deploy
