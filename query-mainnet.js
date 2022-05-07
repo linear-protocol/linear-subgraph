@@ -230,44 +230,20 @@ async function getUserIncome(accountId,flag) {
   const currentLinear = mintedLinear.minus(unstakedLinear);
   const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR);
 
-  console.log("calc [subgraph]", 
-    mintedLinear.toString(),
-    unstakedLinear.toString(),
-    price1.toString(),
-    StakedNEAR.toString(),
-    unstakedGetNEAR.toString()
-  );
-
-  // calc 
-  /// 1.4081004735276945813529575e+25
-  // 9.692062036875873253059014e+24
-  // 1.012066972718325905007148032747872
-  // 1.4099999999999999999999996e+25
-  // 9.733291012715018297650809e+24
-
-  // current calculation
-
-  // console.log("calc",
-  //   linearBalance.toString(),
-  //   deposits.linear.toString(),
-  //   liNnearPrice.toString(),
-  //   account.unstaked_balance?.toString(),
-  //   deposits.near.toString(),
+  // console.log("calc [subgraph]",
+  //   mintedLinear.toString(),
+  //   unstakedLinear.toString(),
+  //   price1.toString(),
+  //   StakedNEAR.toString(),
+  //   unstakedGetNEAR.toString()
   // );
-
-  // calc
-  // 3899219892615260567678430
-  // 1500000000000000000000000
-  // 1.012066972718325905
-  // 1000000000000000000000003
-  // 5366708987284981702349190
 
   if (flag) {
     rewardFinal = reward.plus(fessPayed)
-    console.log("rewards [subgraph]", rewardFinal.toString())
+    console.log("rewards [subgraph with fee] =\t\t %s NEAR", rewardFinal.div(10 ** 24).toFixed(8))
     return rewardFinal
   }else {
-    console.log(reward.toString())
+    console.log("rewards [subgraph without fee] =\t %s NEAR", reward.div(10 ** 24).toFixed(8))
     return reward
   }
 }
@@ -299,15 +275,15 @@ async function getStakingReward(accountId) {
     .plus(account.unstaked_balance || 0)
     .minus(deposits.near);
 
-  console.log("calc [indexer]",
-    linearBalance.toString(),
-    deposits.linear.toString(),
-    liNearPrice.toString(),
-    account.unstaked_balance?.toString(),
-    deposits.near.toString(),
-  );
+  // console.log("calc [indexer]",
+  //   linearBalance.toString(),
+  //   deposits.linear.toString(),
+  //   liNearPrice.toString(),
+  //   account.unstaked_balance?.toString(),
+  //   deposits.near.toString(),
+  // );
 
-  console.log("rewards [indexer]", near_reward.toString());
+  console.log("rewards [indexer] =\t\t\t %s NEAR", near_reward.div(10 ** 24).toFixed(8));
   return near_reward;
 }
 
@@ -333,8 +309,8 @@ async function diff(accountId) {
     getStakingReward(accountId)
   ])
 
-  console.log("diff [subgraph - indexer]", rewards_subgraph.minus(rewards_indexer).div(10 ** 24).toString());
-  console.log("diff [subgraph with fee - indexer]", rewards_subgraph_with_fee.minus(rewards_indexer).div(10 ** 24).toString());
+  console.log("diff [subgraph - indexer] =\t\t %s NEAR", rewards_subgraph.minus(rewards_indexer).div(10 ** 24).toFixed(8));
+  console.log("diff [subgraph with fee - indexer] =\t %s NEAR", rewards_subgraph_with_fee.minus(rewards_indexer).div(10 ** 24).toFixed(8));
 }
 
 async function test() {
