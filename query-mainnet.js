@@ -26,19 +26,28 @@ const client = createClient({
   url: APIURL,
 })
 
-async function getSummaryFromContract(){
+let contract = null;
+
+async function loadContract() {
   const near = await connect(configs);
   const account = await near.account("");
-  const contract = new nearAPI.Contract(
-    account, // the account object that is connecting
-    "linear-protocol.near",
-    {
-      // name of contract you're connecting to
-      viewMethods: ["get_summary"], // view methods do not change state but usually return a value
-      changeMethods: [],// change methods modify state
-      //, // account object to initialize and sign transactions.
-    }
-  );
+  if (!contract) {
+    contract = new nearAPI.Contract(
+      account, // the account object that is connecting
+      "linear-protocol.near",
+      {
+        // name of contract you're connecting to
+        viewMethods: ["ft_price", "get_summary", "ft_balance_of", "get_account"], // view methods do not change state but usually return a value
+        changeMethods: [],// change methods modify state
+        //, // account object to initialize and sign transactions.
+      }
+    );
+  }
+  return contract;
+}
+
+async function getSummaryFromContract(){
+  const contract = await loadContract();
   let response = await contract.get_summary();
   //console.log(response);
   return response
@@ -129,7 +138,16 @@ async function queryStakeTime(accountid){
   return queryData.accounts[0]
 }
 
-async function queryLatestPrice(){
+async function queryLatestPrice() {
+  const contract = await loadContract();
+  const price = await contract.ft_price();
+  return {
+    price: price / 10 ** 24,
+    timeStamp: Date.now() * 1000000
+  }
+}
+
+async function queryLatestPrice2(){
   const getLatestQuery = `
     query {
       prices (fisrt: 1, orderBy: id, orderDirection: desc){
@@ -211,20 +229,120 @@ async function getUserIncome(accountId,flag) {
   const fessPayed = new BigNumber(queryData.feesPayed)
   const currentLinear = mintedLinear.minus(unstakedLinear);
   const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR);
+
+  console.log("calc [subgraph]", 
+    mintedLinear.toString(),
+    unstakedLinear.toString(),
+    price1.toString(),
+    StakedNEAR.toString(),
+    unstakedGetNEAR.toString()
+  );
+
+  // calc 
+  /// 1.4081004735276945813529575e+25
+  // 9.692062036875873253059014e+24
+  // 1.012066972718325905007148032747872
+  // 1.4099999999999999999999996e+25
+  // 9.733291012715018297650809e+24
+
+  // current calculation
+
+  // console.log("calc",
+  //   linearBalance.toString(),
+  //   deposits.linear.toString(),
+  //   liNnearPrice.toString(),
+  //   account.unstaked_balance?.toString(),
+  //   deposits.near.toString(),
+  // );
+
+  // calc
+  // 3899219892615260567678430
+  // 1500000000000000000000000
+  // 1.012066972718325905
+  // 1000000000000000000000003
+  // 5366708987284981702349190
+
   if (flag) {
-    rewardFinal = reward.minus(fessPayed)
-    console.log(rewardFinal.toString())
+    rewardFinal = reward.plus(fessPayed)
+    console.log("rewards [subgraph]", rewardFinal.toString())
     return rewardFinal
   }else {
     console.log(reward.toString())
     return reward
   }
 }
+
+async function getDeposits(accountId) {
+  const result = await fetch(`https://api.linearprotocol.org/deposits/${accountId}`);
+  const json = await result.json();
+  return json.deposits;
+};
+
+async function getStakingReward(accountId) {
+  const contract = await loadContract();
+  const [
+    liNearPrice,
+    account,
+    linearBalance,
+    deposits
+  ] = await Promise.all([
+    contract.ft_price(),
+    contract.get_account({ account_id: accountId }),
+    contract.ft_balance_of({ account_id: accountId }),
+    getDeposits(accountId)
+  ]);
+
+  const near_reward = BigNumber(linearBalance)
+    .minus(deposits.linear)
+    .times(liNearPrice)
+    .div(10 ** 24)
+    .plus(account.unstaked_balance || 0)
+    .minus(deposits.near);
+
+  console.log("calc [indexer]",
+    linearBalance.toString(),
+    deposits.linear.toString(),
+    liNearPrice.toString(),
+    account.unstaked_balance?.toString(),
+    deposits.near.toString(),
+  );
+
+  console.log("rewards [indexer]", near_reward.toString());
+  return near_reward;
+}
+
 // calcStakePoolApy()
 // queryStakeTime("goldman.near")
-// getUserIncome("goldman.near",true)
+// getUserIncome(accountId, true)
+// getStakingReward(accountId)
 // getUserIncome("goldman.near",false)
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()
 // calcCurrentLpTVL()
+
+
+async function diff(accountId) {
+  const [
+    rewards_subgraph_with_fee,
+    rewards_subgraph,
+    rewards_indexer
+  ] = await Promise.all([
+    getUserIncome(accountId, true),
+    getUserIncome(accountId, false),
+    getStakingReward(accountId)
+  ])
+
+  console.log("diff [subgraph - indexer]", rewards_subgraph.minus(rewards_indexer).div(10 ** 24).toString());
+  console.log("diff [subgraph with fee - indexer]", rewards_subgraph_with_fee.minus(rewards_indexer).div(10 ** 24).toString());
+}
+
+async function test() {
+  const accountId = "cookiemonster.near" 
+    // "retitre.near"
+    // "calmincome1.near"
+    // "linguists.near"
+  await diff(accountId);
+}
+
+test();
