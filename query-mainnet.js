@@ -208,6 +208,7 @@ async function getTransferIncome(accountID) {
   console.log("transfer reward: ",transferInReward - transferOutReward)
   return transferInReward - transferOutReward
 }
+
 async function queryLatestPrice2(){
   const getLatestQuery = `
     query {
@@ -261,7 +262,7 @@ async function getUserIncome(accountId,flag) {
     console.log("fail to query user")
     return
   }
-  const latestPrice = await queryLatestPrice()
+  const latestPrice = await queryLatestPrice2()
   const price1 = new BigNumber(latestPrice.price)
   const mintedLinear = new BigNumber(queryData.mintedLinear)
   const StakedNEAR = new BigNumber(queryData.stakedNEAR)
@@ -269,8 +270,9 @@ async function getUserIncome(accountId,flag) {
   const unstakedGetNEAR = new BigNumber(queryData.unstakeGetNear)
   const fessPayed = new BigNumber(queryData.feesPayed)
   const currentLinear = mintedLinear.minus(unstakedLinear);
-  const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR);
-
+  const transferReward = await getTransferIncome(accountId);
+  const tfReward = new BigNumber(transferReward);
+  const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR).plus(tfReward);
   // console.log("calc [subgraph]",
   //   mintedLinear.toString(),
   //   unstakedLinear.toString(),
@@ -330,14 +332,14 @@ async function getStakingReward(accountId) {
 
 // calcStakePoolApy()
 // queryStakeTime("goldman.near")
-// getUserIncome(accountId, true)
+ getUserIncome("cookiemonster.near", true)
 // getStakingReward(accountId)
-// getUserIncome("goldman.near",false)
+ // getUserIncome("cookiemonster.near",false)
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()
 // calcCurrentLpTVL()
-getTransferIncome("cookiemonster.near")
+// getTransferIncome("cookiemonster.near")
 
 async function diff(accountId) {
   const [
@@ -362,4 +364,4 @@ async function test() {
   await diff(accountId);
 }
 
-//test();
+// test();
