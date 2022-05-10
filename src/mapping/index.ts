@@ -1,5 +1,5 @@
 import { near, BigInt, log, json, TypedMap, JSONValue, Value, bigInt, BigDecimal, bigDecimal } from "@graphprotocol/graph-ts";
-import { Price, Account, LpApy, LpApyFlag, FtTransfer } from "../generated/schema";
+import { Price, Account, LpApy, LpApyFlag, FtTransfer } from "../../generated/schema";
 
 
 export function handleReceipt(

@@ -1,27 +1,31 @@
 # Subgraph for LiNEAR
-[Testnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linear?selected=playground)
 
-[Mainnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linearmainnet?selected=playground)
+## Development
 
-## deploy
-* ```yarn auth ${your_access_token}```
-* ```yarn deploy ${your_subgraph_name} ```
-
-## usage
-* ```npm install```
-* ```node query.js```
-
-## query
-use ```query.js``` to query the testnet graph and ```query-mainnet.js``` to query mainnet graph
+```bash
+# copy env and adjust its content
+# you can get an access token from https://thegraph.com/explorer/dashboard
+cp .env.example .env
+# install project dependencies
+npm i
+# run codegen
+npm run codegen
+# now you're able to deploy to thegraph via
+npm run deploy
 ```
-// calcStakePoolApy()
-// queryStakeTime("goldman.near")
-// getUserIncome("cookiemonster.near", true)
-// getStakingReward(accountId)
-// getUserIncome("cookiemonster.near",false)
-// getPriceFromContract()
-// queryLatestPrice()
-// calcLpApy()
-// calcCurrentLpTVL()
-// getTransferIncome("cookiemonster.near")
+
+## Deployment
+
+To be able to deploy to the hosted solution you will need to create a .env file and add `ACCESS_TOKEN` environment variable. You can find this in the dashboard of the TheGraph
+
 ```
+// For Testnet:
+npm run deploy:testnet
+
+// For Mainnet:
+npm run deploy:mainnet
+```
+
+## Test
+
+To test the deployed subgraph, you can try with the examples from `scripts/query.js`

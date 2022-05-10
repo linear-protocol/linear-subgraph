@@ -13,11 +13,12 @@ dataSources:
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mapping.ts
+      file: ./src/mapping/index.ts
       entities:
         - Account
         - LpApy
         - Price
         - LpApyFlag
+        - FtTransfer
       receiptHandlers:
         - handler: handleReceipt
