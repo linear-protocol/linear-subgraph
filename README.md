@@ -30,4 +30,12 @@ npm run deploy:mainnet
 
 ## Test
 
-To test the deployed subgraph, you can try with the examples from `scripts/query.js`
+To test the deployed subgraph, you can try querying with the examples.
+
+```bash
+npm i
+# test APY data
+node test/apy.js
+# test staking rewards data
+node test/stake.js
+```
