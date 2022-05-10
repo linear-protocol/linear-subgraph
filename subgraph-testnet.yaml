@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: near
     name: receipts
-    network: near-mainnet
+    network: near-testnet
     source:
-      account: "linear-protocol.near"
-      startBlock: 62063405
+      account: "linear-protocol.testnet"
+      startBlock: 84652738
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
@@ -19,6 +19,5 @@ dataSources:
         - LpApy
         - Price
         - LpApyFlag
-        - transferEvent
       receiptHandlers:
         - handler: handleReceipt

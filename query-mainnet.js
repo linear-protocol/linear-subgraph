@@ -332,9 +332,9 @@ async function getStakingReward(accountId) {
 
 // calcStakePoolApy()
 // queryStakeTime("goldman.near")
-// getUserIncome("cookiemonster.near", true)
+ getUserIncome("cookiemonster.near", true)
 // getStakingReward(accountId)
-// getUserIncome("cookiemonster.near",false)
+ // getUserIncome("cookiemonster.near",false)
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()
