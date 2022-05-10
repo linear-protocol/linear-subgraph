@@ -14,12 +14,14 @@
 ## query
 use ```query.js``` to query the testnet graph and ```query-mainnet.js``` to query mainnet graph
 ```
-calcStakePoolApy()
-queryStakeTime("goldman.testnet")
-getUserIncome("goldman.testnet",true)
-getUserIncome("goldman.testnet",false)
-getPriceFromContract()
-queryLatestPrice()
-calcLpApy()
-calcCurrentLpTVL()
+// calcStakePoolApy()
+// queryStakeTime("goldman.near")
+// getUserIncome("cookiemonster.near", true)
+// getStakingReward(accountId)
+// getUserIncome("cookiemonster.near",false)
+// getPriceFromContract()
+// queryLatestPrice()
+// calcLpApy()
+// calcCurrentLpTVL()
+// getTransferIncome("cookiemonster.near")
 ```
