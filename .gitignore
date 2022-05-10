@@ -3,3 +3,4 @@ build
 generated
 .env
 yarn-error.log
+subgraph.yml

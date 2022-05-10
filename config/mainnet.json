@@ -1,0 +1,5 @@
+{
+    "network": "near-mainnet",
+    "contract": "linear-protocol.near",
+    "startBlock": 61147683
+}

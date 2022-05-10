@@ -8,6 +8,8 @@
 cp .env.example .env
 # install project dependencies
 npm i
+# prepare subgraphy.yml
+npm run prepare:mainnet
 # run codegen
 npm run codegen
 # now you're able to deploy to thegraph via
