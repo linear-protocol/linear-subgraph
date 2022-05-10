@@ -1,5 +1,5 @@
 specVersion: 0.0.4
-description: LiNEAR Protocol subgraph
+description: Sub-graph for LiNEAR
 repository: https://github.com/linear-protocol/linear-subgraph
 schema:
   file: ./schema.graphql
@@ -19,6 +19,6 @@ dataSources:
         - LpApy
         - Price
         - LpApyFlag
-        - transferEvent
+        - FtTransfer
       receiptHandlers:
         - handler: handleReceipt

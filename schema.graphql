@@ -6,12 +6,12 @@ type Account @entity{
    mintedLinear: BigInt 
    unstakeLinear: BigInt 
    unstakeGetNear: BigInt 
-   transferedOut: [transferEvent!]
-   transferedIn: [transferEvent!]
+   transferedOut: [FtTransfer!]
+   transferedIn: [FtTransfer!]
    feesPayed: BigInt!
 }
 
-type transferEvent @entity {
+type FtTransfer @entity {
     id: ID!
     to: Account!
     from: Account!

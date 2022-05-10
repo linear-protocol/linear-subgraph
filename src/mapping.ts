@@ -1,5 +1,5 @@
 import { near, BigInt, log,json, TypedMap, JSONValue, Value, bigInt, BigDecimal, bigDecimal  } from "@graphprotocol/graph-ts";
-import { Price,Account,LpApy,LpApyFlag, transferEvent} from "../generated/schema";
+import { Price,Account,LpApy,LpApyFlag, FtTransfer} from "../generated/schema";
 
 
 export function handleReceipt(
@@ -168,11 +168,11 @@ function handleAction(
           let amountInt = BigInt.fromString(amount)
           let fromUser = Account.load(fromAccount)
           let toUser = Account.load(toAccount)
-          let transferedEvent = transferEvent.load(receiptHash)
+          let transferedEvent = FtTransfer.load(receiptHash)
           if (transferedEvent) {
             log.error("internal error: {}",["transfer event"])
           }else {
-            transferedEvent = new transferEvent(receiptHash)
+            transferedEvent = new FtTransfer(receiptHash)
             transferedEvent.to = toAccount
             transferedEvent.from = fromAccount
             transferedEvent.amount = amountInt
