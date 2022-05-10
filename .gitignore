@@ -2,3 +2,4 @@ node_modules
 build
 generated
 .env
+yarn-error.log
