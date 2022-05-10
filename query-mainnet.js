@@ -107,7 +107,7 @@ async function calcCurrentLpTVL() {
   const initFeesPayed = await getTargetTimeFeesPayed(targetTimeForFees)
   const secsCurrent = new BigNumber(tmpFeesPayed.timeStamp)
   const secsInit = new BigNumber(initFeesPayed.timeStamp)
-  const days = secsCurrent.minus(secsInit).div(24).div(60*60).div(1000000000)
+  const days = 3; // secsCurrent.minus(secsInit).div(24).div(60*60).div(1000000000)
   console.log("days ",days.toString())
   const feesCurrent = new BigNumber(tmpFeesPayed.feesPayed)
   const feesInit = new BigNumber(initFeesPayed.feesPayed)
@@ -124,7 +124,7 @@ async function queryStakeTime(accountid){
       startTime
     }
   }`
-  console.log(getStakeTimeQuery)
+  // console.log(getStakeTimeQuery)
   let data = await client.query(getStakeTimeQuery).toPromise()
   let queryData = data.data
   if (queryData == null){
@@ -154,7 +154,7 @@ async function queryBefore(timeStamp){
     console.log("fail to query price")
     return
   }
-  console.log("price at %s : %s",timeStamp.toString(),queryData.prices[0].price.toString())
+  // console.log("price at %s : %s",timeStamp.toString(),queryData.prices[0].price.toString())
   return queryData.prices[0]
 }
 
@@ -166,6 +166,7 @@ async function queryLatestPrice() {
     timeStamp: Date.now() * 1000000
   }
 }
+
 async function getTransferIncome(accountID) {
   const getTransferEvent = `
     query {
@@ -181,7 +182,7 @@ async function getTransferIncome(accountID) {
         }
       }
   }`
-  console.log(getTransferEvent)
+  // console.log(getTransferEvent)
   let data = await client.query(getTransferEvent).toPromise()
   let queryData = data.data
   //console.log(queryData.accounts[0].transferedIn)
@@ -205,7 +206,7 @@ async function getTransferIncome(accountID) {
     let tmpReward = transferOut[i].amount * (latestPrice.price - tempPrice.price)
     transferOutReward+=tmpReward;
   }
-  console.log("transfer reward: ",transferInReward - transferOutReward)
+  // console.log("transfer reward: ",transferInReward - transferOutReward)
   return transferInReward - transferOutReward
 }
 
@@ -225,20 +226,20 @@ async function queryLatestPrice2(){
     console.log("fail to query price")
     return
   }
-  console.log("current price: ",queryData.prices[0].price.toString())
+  // console.log("current price: ",queryData.prices[0].price.toString())
   return queryData.prices[0]
 }
 
 async function calcStakePoolApy(){
   const latesdPrice = await queryLatestPrice2()
   const targetTime = Number(latesdPrice.timeStamp) - 30 * 24 * 60 * 60 * 1000000000
-  const threeMonthsBefore = await queryBefore(targetTime)
+  const price30DaysAgo = await queryBefore(targetTime)
   const price1 = new BigNumber(latesdPrice.price)
-  const price2 = new BigNumber(threeMonthsBefore.price)
-  //console.log(price1, price2)
-  const timeGap = new BigNumber(Number(latesdPrice.timeStamp - threeMonthsBefore.timeStamp))
+  const price2 = new BigNumber(price30DaysAgo.price)
+  // console.log(latesdPrice, price30DaysAgo)
+  const timeGap = new BigNumber(Number(latesdPrice.timeStamp - price30DaysAgo.timeStamp))
   const times1 = new BigNumber(24 * 60 * 60 * 1000000000 * 365)
-  const apy = price1.minus(price2).div(timeGap).times(times1)
+  const apy = price1.minus(price2).times(times1).div(timeGap)
   console.log("apy: ",apy.toString())
 }
 
@@ -331,8 +332,8 @@ async function getStakingReward(accountId) {
 }
 
 // calcStakePoolApy()
-// queryStakeTime("goldman.near")
- getUserIncome("cookiemonster.near", true)
+// queryStakeTime("cookiemonster.near")
+// getUserIncome("cookiemonster.near", true)
 // getStakingReward(accountId)
  // getUserIncome("cookiemonster.near",false)
 // getPriceFromContract()
