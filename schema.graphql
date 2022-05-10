@@ -6,15 +6,18 @@ type Account @entity{
    mintedLinear: BigInt 
    unstakeLinear: BigInt 
    unstakeGetNear: BigInt 
-   depositedNEAR: BigInt
-   withDrawedNEAR: BigInt
-   unstakeBalance: BigInt
-   linearBalance: BigInt 
-   transferedOut: BigInt
-   transferedIn: BigInt
-   feesPayed: BigInt
+   transferedOut: [transferEvent!]
+   transferedIn: [transferEvent!]
+   feesPayed: BigInt!
 }
- 
+
+type transferEvent @entity {
+    id: ID!
+    to: Account!
+    from: Account!
+    timeStamp: String!
+    amount: BigInt!
+}
 
 type Price @entity{
    id: ID!

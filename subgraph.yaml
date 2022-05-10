@@ -9,7 +9,7 @@ dataSources:
     network: near-mainnet
     source:
       account: "linear-protocol.near"
-      startBlock: 62063415
+      startBlock: 62063405
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
@@ -19,5 +19,6 @@ dataSources:
         - LpApy
         - Price
         - LpApyFlag
+        - transferEvent
       receiptHandlers:
         - handler: handleReceipt

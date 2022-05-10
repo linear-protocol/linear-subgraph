@@ -1,5 +1,5 @@
 import { near, BigInt, log,json, TypedMap, JSONValue, Value, bigInt, BigDecimal, bigDecimal  } from "@graphprotocol/graph-ts";
-import { Price,Account,LpApy,LpApyFlag} from "../generated/schema";
+import { Price,Account,LpApy,LpApyFlag, transferEvent} from "../generated/schema";
 
 
 export function handleReceipt(
@@ -15,21 +15,17 @@ export function handleReceipt(
   }
 }
 
-function checkAndCreateUser(id:string,startTime:string,height:BigInt,mintedLinear:BigInt,stakedNEAR:BigInt,transferIn:BigInt,transferedOut:BigInt,unstakedBalance:BigInt,unstakeGetNear:BigInt,depoitedNEAR:BigInt,withdrawedNEAR:BigInt,feesPayed:BigInt,unstakeLinear:BigInt,linearBalance:BigInt) :void{
+function checkAndCreateUser(id:string,startTime:string,height:BigInt,mintedLinear:BigInt,stakedNEAR:BigInt,unstakeGetNear:BigInt,unstakeLinear:BigInt,transferedIn:string[],transferedOut:string[],feesPayed:BigInt) :void{
   let user = new Account(id)
   user.startTime = startTime
   user.height = height
   user.mintedLinear = mintedLinear
   user.stakedNEAR = stakedNEAR
-  user.transferedIn = transferIn
-  user.transferedOut = transferedOut
-  user.unstakeBalance = unstakedBalance
   user.unstakeGetNear = unstakeGetNear
-  user.depositedNEAR = depoitedNEAR
-  user.withDrawedNEAR = withdrawedNEAR
-  user.feesPayed = feesPayed
   user.unstakeLinear = unstakeLinear
-  user.linearBalance = linearBalance 
+  user.transferedIn = transferedIn
+  user.transferedOut = transferedOut
+  user.feesPayed = feesPayed
   user.save()
 }
 
@@ -44,47 +40,17 @@ function handleAction(
   const blockHeight = receiptWithOutcome.block.header.height
   const epochId = receiptWithOutcome.block.header.epochId
   const outcome = receiptWithOutcome.outcome;
+  const receiptHash = receiptWithOutcome.receipt.id.toBase58()
   const functionCall = action.toFunctionCall()
   const methodName = functionCall.methodName
-  if (methodName == 'deposit') {
-    for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
-      let outcomeLog = outcome.logs[logIndex].toString();
-      if (outcomeLog.includes('EVENT_JSON:')){
-        outcomeLog = outcomeLog.replace('EVENT_JSON:','')
-        const jsonData = json.try_fromString(outcomeLog)
-        const jsonObject = jsonData.value.toObject()
-        const event = jsonObject.get('event')!
-        if (event.toString() == "deposit"){
-          const data = jsonObject.get('data')!
-          const dataArr = data.toArray()!
-          
-          const dataObj = dataArr[0]!.toObject()
-          const depositAccount = dataObj.get('account_id')!.toString()
-          const depoositAmount = dataObj.get('amount')!.toString()
-          const unstakedBalance = dataObj.get('new_unstaked_balance')!.toString()
-          let user = Account.load(depositAccount)
-          if (user) {
-            user.unstakeBalance = BigInt.fromString(unstakedBalance)
-            user.depositedNEAR += BigInt.fromString(depoositAmount)
-            user.save()
-          }else{
-            log.info('create user {}',[depositAccount])
-            checkAndCreateUser(depositAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0), BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromString(unstakedBalance),BigInt.fromU64(0),BigInt.fromString(depoositAmount),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0))
-          }
-        }
-      }
-    }
-  }
   if (methodName == 'stake' || methodName == 'deposit_and_stake' || methodName == 'stake_all' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
-      
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.includes('EVENT_JSON:')){
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         const jsonData = json.try_fromString(outcomeLog)
         const jsonObject = jsonData.value.toObject()
         const event = jsonObject.get('event')!
-        
         if (event.toString() == "stake"){
           const data = jsonObject.get('data')!
           const dataArr = data.toArray()!
@@ -95,17 +61,16 @@ function handleAction(
           const stakeAmount = BigInt.fromString(stakeAmountStr)
           const minted_shares = BigInt.fromString(mintedSharesStr)
           let user = Account.load(account)
-  
           // update user
           if (!user){
+            let transferedIn : string[] = []
+            let transferedOut : string[] = []
             log.info('create user {}',[account])
-            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),minted_shares,stakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),stakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),minted_shares)
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),minted_shares,stakeAmount,BigInt.fromI32(0),BigInt.fromI32(0),transferedIn,transferedOut,BigInt.fromI32(0),)
           }else {
             log.info('update user {}',[account])
             user.stakedNEAR += stakeAmount
             user.mintedLinear += minted_shares
-            user.linearBalance += minted_shares
-            user.depositedNEAR += stakeAmount
             user.save()
           }
           // update price
@@ -119,7 +84,6 @@ function handleAction(
           price.price = stakeAmountFloat.div(minted_sharesFloat)
           price.save()
         }
-
       }
     }   
   }
@@ -164,7 +128,6 @@ function handleAction(
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.includes('EVENT_JSON:')){
-
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         const jsonData = json.try_fromString(outcomeLog)
         const jsonObject = jsonData.value.toObject()
@@ -179,7 +142,7 @@ function handleAction(
           log.info('create {}',['user'])
           // update user
           if (!user){
-            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0))
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromI32(0),BigInt.fromI32(0),BigInt.fromI32(0),BigInt.fromI32(0),[],[],BigInt.fromI32(0),)
           }
         }
       }
@@ -205,17 +168,32 @@ function handleAction(
           let amountInt = BigInt.fromString(amount)
           let fromUser = Account.load(fromAccount)
           let toUser = Account.load(toAccount)
+          let transferedEvent = transferEvent.load(receiptHash)
+          if (transferedEvent) {
+            log.error("internal error: {}",["transfer event"])
+          }else {
+            transferedEvent = new transferEvent(receiptHash)
+            transferedEvent.to = toAccount
+            transferedEvent.from = fromAccount
+            transferedEvent.amount = amountInt
+            transferedEvent.timeStamp = timeStamp.toString()
+            transferedEvent.save()
+          }
           if (fromUser){
-            fromUser.transferedOut += amountInt
+            let temp = fromUser.transferedOut!
+            temp.push(receiptHash)
+            fromUser.transferedOut = temp
             fromUser.save()
           }else{
-            checkAndCreateUser(fromAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),amountInt,BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0))
+            checkAndCreateUser(fromAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),[],[receiptHash],BigInt.fromI32(0),)
           }
           if (toUser){
-            toUser.transferedIn += amountInt
+            let temp = toUser.transferedIn!
+            temp.push(receiptHash)
+            toUser.transferedIn = temp
             toUser.save()
           }else{
-            checkAndCreateUser(toAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),amountInt,BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0))
+            checkAndCreateUser(toAccount,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),BigInt.fromU32(0),[receiptHash],[],BigInt.fromI32(0),)
           }
         }
       }
@@ -252,7 +230,7 @@ function handleAction(
           let user = Account.load(account)!
           log.info('find {}',['user'])
           if (!user) {
-            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),BigInt.fromU64(0),unstakeAmount,BigInt.fromU64(0),BigInt.fromU64(0),feesPayed,unstakeLinearAmount,BigInt.fromU64(0))
+            checkAndCreateUser(account,timeStamp.toString(),BigInt.fromU64(blockHeight),BigInt.fromU64(0),BigInt.fromU64(0),unstakeAmount,unstakeLinearAmount,[],[],BigInt.fromI32(0))
           }else{
             user.unstakeGetNear +=  unstakeAmount
             user.unstakeLinear += unstakeLinearAmount
@@ -311,7 +289,6 @@ function handleAction(
             newLpApy.save()
             log.info('finish to save {}',["lp apy fee"])
           }
-          
         }
       }
     }
