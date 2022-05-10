@@ -46,7 +46,7 @@ function handleAction(
   if (methodName == 'stake' || methodName == 'deposit_and_stake' || methodName == 'stake_all' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
-      if (outcomeLog.includes('EVENT_JSON:')){
+      if (outcomeLog.startsWith('EVENT_JSON:')){
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         const jsonData = json.try_fromString(outcomeLog)
         const jsonObject = jsonData.value.toObject()
@@ -90,7 +90,7 @@ function handleAction(
   if (methodName == 'unstake' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
-      if (outcomeLog.includes('EVENT_JSON:')){
+      if (outcomeLog.startsWith('EVENT_JSON:')){
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         const jsonData = json.try_fromString(outcomeLog)
         const jsonObject = jsonData.value.toObject()
@@ -113,8 +113,8 @@ function handleAction(
           // update price
           log.info('start handle {}',['price'])
           let price = new Price(blockHeight.toString())
-          let burnedSharesFloat = BigDecimal.fromString(burnedSharesStr)
-          let unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr)
+          const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr)
+          const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr)
           price.NEARNum = unstakeSharesFloat
           price.LinearNum = burnedSharesFloat
           price.timeStamp = timeStamp.toString()
@@ -127,7 +127,7 @@ function handleAction(
   if (methodName == 'add_liquidity' || methodName == 'remove_liquidity' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
-      if (outcomeLog.includes('EVENT_JSON:')){
+      if (outcomeLog.startsWith('EVENT_JSON:')){
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         const jsonData = json.try_fromString(outcomeLog)
         const jsonObject = jsonData.value.toObject()
@@ -151,7 +151,7 @@ function handleAction(
   if (methodName == 'ft_transfer' || methodName == 'ft_transfer_call') {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString()
-      if (outcomeLog.includes('EVENT_JSON:')){
+      if (outcomeLog.startsWith('EVENT_JSON:')){
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         let jsonData = json.try_fromString(outcomeLog)
         let jsonObject = jsonData.value.toObject()
@@ -203,7 +203,7 @@ function handleAction(
   if (methodName == 'instant_unstake' ) {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString()
-      if (outcomeLog.includes('EVENT_JSON:')){
+      if (outcomeLog.startsWith('EVENT_JSON:')){
         log.info('into {}',['instant unstake'])
         outcomeLog = outcomeLog.replace('EVENT_JSON:','')
         let jsonData = json.try_fromString(outcomeLog)
