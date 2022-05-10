@@ -131,7 +131,7 @@ async function queryStakeTime(accountid){
     console.log("fail to query price")
     return
   }
-  let timeStampInt = new Number(queryData.accounts[0].startTime.toString())
+  const timeStampInt = new Number(queryData.accounts[0].startTime.toString())
   const unixTimeStamp = timeStampInt / 1000000
   const date = new Date(unixTimeStamp)
   console.log("user first stake time: ",date)
@@ -243,7 +243,7 @@ async function calcStakePoolApy(){
 }
 
 async function getUserIncome(accountId,flag) {
-  let getIncomeQuery = `
+  const getIncomeQuery = `
     query {
       accounts (fisrt: 1, where: {id: "${accountId}"} ){
         id
@@ -332,9 +332,9 @@ async function getStakingReward(accountId) {
 
 // calcStakePoolApy()
 // queryStakeTime("goldman.near")
- getUserIncome("cookiemonster.near", true)
+// getUserIncome("cookiemonster.near", true)
 // getStakingReward(accountId)
- // getUserIncome("cookiemonster.near",false)
+// getUserIncome("cookiemonster.near",false)
 // getPriceFromContract()
 // queryLatestPrice()
 // calcLpApy()

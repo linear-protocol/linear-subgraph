@@ -1,12 +1,11 @@
 # Subgraph for LiNEAR
 [Testnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linear?selected=playground)
-
 [Mainnet Playground address](https://thegraph.com/hosted-service/subgraph/ha4a4ck/linearmainnet?selected=playground)
 
 ## deploy
-* ```graph auth --product hosted-service xxxxx ```
-* testnet: ```graph deploy --product hosted-service ha4a4ck/linear ```
-* mainnet: change the  
+* ```yarn auth ${your_access_token}```
+* ```yarn deploy ${your_subgraph_name} ```
+
 ## usage
 * ```npm install```
 * ```node query.js```

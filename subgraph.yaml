@@ -9,7 +9,7 @@ dataSources:
     network: near-mainnet
     source:
       account: "linear-protocol.near"
-      startBlock: 62063405
+      startBlock: 61147683
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
