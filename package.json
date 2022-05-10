@@ -12,13 +12,20 @@
     "deploy:hosted": "graph deploy $SLUG --product hosted-service --access-token $ACCESS_TOKEN",
     "deploy:mainnet": "npm run prepare:mainnet && SLUG=linear-protocol/linear npm run deploy",
     "deploy:testnet": "npm run prepare:testnet && SLUG=linear-protocol/linear-testnet npm run deploy",
-    "deploy-local": "graph deploy linear --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "deploy-local": "graph deploy linear --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "lint": "eslint . --ext .ts"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.23.2",
     "@graphprotocol/graph-ts": "^0.23.1",
     "env-cmd": "^10.1.0",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint": "^6.2.2",
+    "eslint-config-prettier": "^6.1.0",
+    "lint-staged": "^9.2.5",
+    "prettier": "^1.18.2"
   },
   "dependencies": {
     "@apollo/client": "^3.5.10",

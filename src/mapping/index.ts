@@ -1,6 +1,5 @@
-import { near, BigInt, log, json, TypedMap, JSONValue, Value, bigInt, BigDecimal, bigDecimal } from "@graphprotocol/graph-ts";
+import { near, BigInt, log, json, TypedMap, JSONValue, Value, BigDecimal } from "@graphprotocol/graph-ts";
 import { Price, Account, LpApy, LpApyFlag, FtTransfer } from "../../generated/schema";
-
 
 export function handleReceipt(
   receipt: near.ReceiptWithOutcome
@@ -15,13 +14,13 @@ export function handleReceipt(
   }
 }
 
-function checkAndCreateUser(id: string, startTime: string, height: BigInt, mintedLinear: BigInt, stakedNEAR: BigInt, unstakeGetNear: BigInt, unstakeLinear: BigInt, transferedIn: string[], transferedOut: string[], feesPayed: BigInt): void {
+function checkAndCreateUser(id: string, startTime: string, height: BigInt, mintedLinear: BigInt, stakedNear: BigInt, unstakeReceivedNear: BigInt, unstakeLinear: BigInt, transferedIn: string[], transferedOut: string[], feesPayed: BigInt): void {
   let user = new Account(id)
   user.startTime = startTime
   user.height = height
   user.mintedLinear = mintedLinear
-  user.stakedNEAR = stakedNEAR
-  user.unstakeGetNear = unstakeGetNear
+  user.stakedNear = stakedNear
+  user.unstakeReceivedNear = unstakeReceivedNear
   user.unstakeLinear = unstakeLinear
   user.transferedIn = transferedIn
   user.transferedOut = transferedOut
@@ -43,6 +42,7 @@ function handleAction(
   const receiptHash = receiptWithOutcome.receipt.id.toBase58()
   const functionCall = action.toFunctionCall()
   const methodName = functionCall.methodName
+
   if (methodName == 'stake' || methodName == 'deposit_and_stake' || methodName == 'stake_all') {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
@@ -69,7 +69,7 @@ function handleAction(
             checkAndCreateUser(account, timeStamp.toString(), BigInt.fromU64(blockHeight), minted_shares, stakeAmount, BigInt.fromI32(0), BigInt.fromI32(0), transferedIn, transferedOut, BigInt.fromI32(0),)
           } else {
             log.info('update user {}', [account])
-            user.stakedNEAR += stakeAmount
+            user.stakedNear += stakeAmount
             user.mintedLinear += minted_shares
             user.save()
           }
@@ -78,8 +78,8 @@ function handleAction(
           let price = new Price(blockHeight.toString())
           let minted_sharesFloat = BigDecimal.fromString(mintedSharesStr)
           let stakeAmountFloat = BigDecimal.fromString(stakeAmountStr)
-          price.LinearNum = minted_sharesFloat
-          price.NEARNum = stakeAmountFloat
+          price.linearAmount = minted_sharesFloat
+          price.nearAmount = stakeAmountFloat
           price.timeStamp = timeStamp.toString()
           price.price = stakeAmountFloat.div(minted_sharesFloat)
           price.save()
@@ -107,7 +107,7 @@ function handleAction(
           const burnedShares = BigInt.fromString(burnedSharesStr)
           let user = Account.load(account)!
           log.info('find {}', ['user'])
-          user.unstakeGetNear += unstakeAmount
+          user.unstakeReceivedNear += unstakeAmount
           user.unstakeLinear += burnedShares
           user.save()
           // update price
@@ -115,8 +115,8 @@ function handleAction(
           let price = new Price(blockHeight.toString())
           const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr)
           const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr)
-          price.NEARNum = unstakeSharesFloat
-          price.LinearNum = burnedSharesFloat
+          price.nearAmount = unstakeSharesFloat
+          price.linearAmount = burnedSharesFloat
           price.timeStamp = timeStamp.toString()
           price.price = unstakeSharesFloat.div(burnedSharesFloat)
           price.save()
@@ -232,7 +232,7 @@ function handleAction(
           if (!user) {
             checkAndCreateUser(account, timeStamp.toString(), BigInt.fromU64(blockHeight), BigInt.fromU64(0), BigInt.fromU64(0), unstakeAmount, unstakeLinearAmount, [], [], BigInt.fromI32(0))
           } else {
-            user.unstakeGetNear += unstakeAmount
+            user.unstakeReceivedNear += unstakeAmount
             user.unstakeLinear += unstakeLinearAmount
             user.feesPayed += feesPayed
             user.save()
@@ -267,9 +267,9 @@ function handleAction(
           }
           let lpFlag = LpApyFlag.load("flag".toString())
           if (lpFlag) {
-            const lastLpFlag = lpFlag.LastApyId
+            const lastLpFlag = lpFlag.lastApyId
             const lastLpApy = LpApy.load(lastLpFlag.toString())!
-            lpFlag.LastApyId += 1
+            lpFlag.lastApyId += 1
             lpFlag.save()
             const lastFees = lastLpApy.feesPayed
 
@@ -281,7 +281,7 @@ function handleAction(
             log.info('finish to save {}', ["lp apy fee"])
           } else {
             lpFlag = new LpApyFlag("flag".toString())
-            lpFlag.LastApyId = 0
+            lpFlag.lastApyId = 0
             lpFlag.save()
             let newLpApy = new LpApy("0".toString())
             newLpApy.timeStamp = timeStamp.toString()

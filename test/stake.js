@@ -72,9 +72,9 @@ async function getUserIncome(accountId, flag) {
       accounts (fisrt: 1, where: {id: "${accountId}"} ){
         id
         mintedLinear
-        stakedNEAR
+        stakedNear
         unstakeLinear
-        unstakeGetNear
+        unstakeReceivedNear
         feesPayed
       }
     }`
@@ -89,19 +89,19 @@ async function getUserIncome(accountId, flag) {
   const latestPrice = await queryLatestPriceFromSubgraph()
   const price1 = new BigNumber(latestPrice.price)
   const mintedLinear = new BigNumber(queryData.mintedLinear)
-  const StakedNEAR = new BigNumber(queryData.stakedNEAR)
+  const stakedNear = new BigNumber(queryData.stakedNear)
   const unstakedLinear = new BigNumber(queryData.unstakeLinear)
-  const unstakedGetNEAR = new BigNumber(queryData.unstakeGetNear)
+  const unstakedGetNEAR = new BigNumber(queryData.unstakeReceivedNear)
   const fessPayed = new BigNumber(queryData.feesPayed)
   const currentLinear = mintedLinear.minus(unstakedLinear);
   const transferReward = await getTransferIncome(accountId);
   const tfReward = new BigNumber(transferReward);
-  const reward = currentLinear.times(price1).integerValue().minus(StakedNEAR).plus(unstakedGetNEAR).plus(tfReward);
+  const reward = currentLinear.times(price1).integerValue().minus(stakedNear).plus(unstakedGetNEAR).plus(tfReward);
   // console.log("calc [subgraph]",
   //   mintedLinear.toString(),
   //   unstakedLinear.toString(),
   //   price1.toString(),
-  //   StakedNEAR.toString(),
+  //   stakedNear.toString(),
   //   unstakedGetNEAR.toString()
   // );
 

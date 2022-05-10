@@ -2,10 +2,10 @@ type Account @entity{
    id: ID!
    height: BigInt!
    startTime: String!
-   stakedNEAR: BigInt 
+   stakedNear: BigInt 
    mintedLinear: BigInt 
    unstakeLinear: BigInt 
-   unstakeGetNear: BigInt 
+   unstakeReceivedNear: BigInt 
    transferedOut: [FtTransfer!]
    transferedIn: [FtTransfer!]
    feesPayed: BigInt!
@@ -22,8 +22,8 @@ type FtTransfer @entity {
 type Price @entity{
    id: ID!
    timeStamp: String!
-   LinearNum: BigDecimal!
-   NEARNum: BigDecimal!
+   linearAmount: BigDecimal!
+   nearAmount: BigDecimal!
    price: BigDecimal!
 }
 
@@ -35,5 +35,5 @@ type LpApy @entity{
 
 type LpApyFlag @entity {
     id: ID!
-    LastApyId: Int!
+    lastApyId: Int!
 }
