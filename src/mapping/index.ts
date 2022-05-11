@@ -3,17 +3,14 @@ import {
   BigInt,
   log,
   json,
-  TypedMap,
-  JSONValue,
-  Value,
   BigDecimal,
 } from "@graphprotocol/graph-ts";
 import {
   Price,
   Account,
-  LpApy,
-  LpApyFlag,
   FtTransfer,
+  TotalSwapFee,
+  Version
 } from "../../generated/schema";
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
@@ -35,6 +32,7 @@ function createAccount(
   transferedOut: string[],
   feesPayed: BigInt
 ): void {
+  log.info("create account {}", [id]);
   let account = new Account(id);
   account.startTime = startTime;
   account.height = height;
@@ -75,7 +73,9 @@ function handleAction(
         const jsonData = json.try_fromString(outcomeLog);
         const jsonObject = jsonData.value.toObject();
         const event = jsonObject.get("event")!;
+
         if (event.toString() == "stake") {
+          // parse event
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
@@ -86,23 +86,23 @@ function handleAction(
             .toString();
           const stakeAmount = BigInt.fromString(stakeAmountStr);
           const minted_shares = BigInt.fromString(mintedSharesStr);
-          let account = Account.load(accountId);
+
           // update account
+          let account = Account.load(accountId);
           if (!account) {
             let transferedIn: string[] = [];
             let transferedOut: string[] = [];
-            log.info("create account {}", [accountId]);
             createAccount(
               accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               minted_shares,
               stakeAmount,
-              BigInt.fromI32(0),
-              BigInt.fromI32(0),
+              BigInt.zero(),
+              BigInt.zero(),
               transferedIn,
               transferedOut,
-              BigInt.fromI32(0)
+              BigInt.zero()
             );
           } else {
             log.info("update account {}", [accountId]);
@@ -110,6 +110,7 @@ function handleAction(
             account.mintedLinear += minted_shares;
             account.save();
           }
+
           // update price
           log.info("start handle {}", ["price"]);
           let price = new Price(blockHeight.toString());
@@ -131,8 +132,9 @@ function handleAction(
         const jsonData = json.try_fromString(outcomeLog);
         const jsonObject = jsonData.value.toObject();
         const event = jsonObject.get("event")!;
+
         if (event.toString() == "unstake") {
-          log.info("start handle {}", ["unstake"]);
+          // parse event
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
@@ -141,13 +143,14 @@ function handleAction(
           const burnedSharesStr = dataObj.get("burnt_stake_shares")!.toString();
           const unstakeAmount = BigInt.fromString(unstakeAmountStr);
           const burnedShares = BigInt.fromString(burnedSharesStr);
+
+          // update account
           let account = Account.load(accountId)!;
-          log.info("find {}", ["account"]);
           account.unstakeReceivedNear += unstakeAmount;
           account.unstakeLinear += burnedShares;
           account.save();
+
           // update price
-          log.info("start handle {}", ["price"]);
           let price = new Price(blockHeight.toString());
           const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
           const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr);
@@ -167,33 +170,36 @@ function handleAction(
         const jsonData = json.try_fromString(outcomeLog);
         const jsonObject = jsonData.value.toObject();
         const event = jsonObject.get("event")!;
+
         if (
           event.toString() == "add_liquidity" ||
           event.toString() == "remove_liquidity"
         ) {
+          // parse event
           log.info("start handle {}", ["liquidity"]);
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
           const accountId = dataObj.get("account_id")!.toString();
           let account = Account.load(accountId);
-          log.info("create {}", ["account"]);
+
           // update account
           if (!account) {
             createAccount(
               accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
-              BigInt.fromI32(0),
-              BigInt.fromI32(0),
-              BigInt.fromI32(0),
-              BigInt.fromI32(0),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
               [],
               [],
-              BigInt.fromI32(0)
+              BigInt.zero()
             );
           }
         } else if (event.toString() == "ft_transfer") {
+          // parse event
           let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
@@ -203,6 +209,8 @@ function handleAction(
           let amountInt = BigInt.fromString(amount);
           let fromAccount = Account.load(oldOwnerId)!;
           let toAccount = Account.load(newOwnerId)!;
+
+          // update FT Transfer event
           let transferedEvent = FtTransfer.load(receiptHash);
           if (transferedEvent) {
             log.error("internal error: {}", ["transfer event"]);
@@ -214,6 +222,8 @@ function handleAction(
             transferedEvent.timeStamp = timeStamp.toString();
             transferedEvent.save();
           }
+
+          // update transfers in account
           let fromTemp = fromAccount.transferedOut!;
           fromTemp.push(receiptHash);
           fromAccount.transferedOut = fromTemp;
@@ -234,8 +244,11 @@ function handleAction(
         let jsonObject = jsonData.value.toObject();
         let event = jsonObject.get("event")!;
         log.info("get ft transer event {}", [event.toString()]);
+
         if (event.toString() == "ft_transfer") {
           log.info("start handle {}", ["ft transer"]);
+
+          // parse event
           let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
@@ -243,8 +256,8 @@ function handleAction(
           let newOwnerId = dataObj.get("new_owner_id")!.toString();
           let amount = dataObj.get("amount")!.toString();
           let amountInt = BigInt.fromString(amount);
-          let fromAccount = Account.load(oldOwnerId);
-          let toAccount = Account.load(newOwnerId);
+
+          // update FT transfer event
           let transferedEvent = FtTransfer.load(receiptHash);
           if (transferedEvent) {
             log.error("internal error: {}", ["transfer event"]);
@@ -256,6 +269,9 @@ function handleAction(
             transferedEvent.timeStamp = timeStamp.toString();
             transferedEvent.save();
           }
+
+          // update from account
+          let fromAccount = Account.load(oldOwnerId);
           if (fromAccount) {
             let temp = fromAccount.transferedOut!;
             temp.push(receiptHash);
@@ -266,15 +282,18 @@ function handleAction(
               oldOwnerId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
               [],
               [receiptHash],
-              BigInt.fromI32(0)
+              BigInt.zero()
             );
           }
+
+          // update to account
+          let toAccount = Account.load(newOwnerId);
           if (toAccount) {
             let temp = toAccount.transferedIn!;
             temp.push(receiptHash);
@@ -285,13 +304,13 @@ function handleAction(
               newOwnerId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
-              BigInt.fromU32(0),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
               [receiptHash],
               [],
-              BigInt.fromI32(0)
+              BigInt.zero()
             );
           }
         }
@@ -307,39 +326,36 @@ function handleAction(
         let jsonObject = jsonData.value.toObject();
         let event = jsonObject.get("event")!;
         log.info("get instant unstake {}", [event.toString()]);
+
         if (event.toString() == "instant_unstake") {
-          log.info("start handle {}", ["instant unstake"]);
+          // parse event
           let data = jsonObject.get("data")!;
-          log.info("get instant unstake {}", ["data"]);
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
           let accountId = dataObj.get("account_id")!.toString();
-          log.info("get instant unstake {}", ["account"]);
           let unstakeAmountStr = dataObj.get("unstaked_amount")!.toString();
-          log.info("get instant unstake {}", ["unstakeAmountStr"]);
           let unstakeLinearAmountStr = dataObj
             .get("swapped_stake_shares")!
             .toString();
-          log.info("get instant unstake {}", ["unstakeLinearAmountStr"]);
           let unstakeAmount = BigInt.fromString(unstakeAmountStr);
           let unstakeLinearAmount = BigInt.fromString(unstakeLinearAmountStr);
           let feesPayedStr = dataObj.get("fee_amount")!.toString();
-          log.info("get instant unstake {}", ["fee_amount"]);
           let feesPayed = BigInt.fromString(feesPayedStr);
+
+          // update account
           let account = Account.load(accountId)!;
-          log.info("find {}", ["account"]);
           if (!account) {
             createAccount(
               accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
-              BigInt.fromU64(0),
-              BigInt.fromU64(0),
+              BigInt.zero(),
+              BigInt.zero(),
               unstakeAmount,
               unstakeLinearAmount,
               [],
               [],
-              BigInt.fromI32(0)
+              BigInt.zero()
             );
           } else {
             account.unstakeReceivedNear += unstakeAmount;
@@ -347,58 +363,41 @@ function handleAction(
             account.feesPayed += feesPayed;
             account.save();
           }
-        }
-
-        if (event.toString() == "liquidity_pool_swap_fee") {
-          log.info("into {}", ["liquidity_pool_swap_fee"]);
-          if (!jsonObject) {
-            log.info("jsonobject {}", ["null"]);
-            return;
-          }
-          let data = jsonObject.get("data");
-          if (!data) {
-            log.info("data {}", ["null"]);
-            return;
-          }
+        } else if (event.toString() == "liquidity_pool_swap_fee") {
+          // parse event
+          let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
-          if (!dataArr) {
-            log.info("dataArr {}", ["null"]);
-            return;
-          }
           let dataObj = dataArr[0].toObject();
-          if (!dataObj) {
-            log.info("dataObj {}", ["null"]);
-            return;
-          }
-          let poolFeesObj = dataObj.get("pool_fee_stake_shares");
-          if (!poolFeesObj) {
-            log.info("poolFeesObj {}", ["null"]);
-            return;
-          }
-          let lpFlag = LpApyFlag.load("flag".toString());
-          if (lpFlag) {
-            const lastLpFlag = lpFlag.lastApyId;
-            const lastLpApy = LpApy.load(lastLpFlag.toString())!;
-            lpFlag.lastApyId += 1;
-            lpFlag.save();
-            const lastFees = lastLpApy.feesPayed;
+          let poolFeesObj = dataObj.get("pool_fee_stake_shares")!;
 
-            const newLpApyId = lastLpFlag + 1;
-            let newLpApy = new LpApy(newLpApyId.toString());
-            newLpApy.timeStamp = timeStamp.toString();
-            newLpApy.feesPayed =
+          // update total swap fee
+          let version = Version.load("latest".toString());
+          if (version) {
+            // increase version
+            const lastVersion = version.version;
+            const lastTotalFee = TotalSwapFee.load(lastVersion.toString())!;
+            version.version += 1;
+            version.save();
+            const lastFees = lastTotalFee.feesPayed;
+
+            // save latest total fees
+            const newVersion = lastVersion + 1;
+            let newTotalFee = new TotalSwapFee(newVersion.toString());
+            newTotalFee.timeStamp = timeStamp.toString();
+            newTotalFee.feesPayed =
               lastFees + BigInt.fromString(poolFeesObj.toString());
-            newLpApy.save();
-            log.info("finish to save {}", ["lp apy fee"]);
+            newTotalFee.save();
           } else {
-            lpFlag = new LpApyFlag("flag".toString());
-            lpFlag.lastApyId = 0;
-            lpFlag.save();
-            let newLpApy = new LpApy("0".toString());
-            newLpApy.timeStamp = timeStamp.toString();
-            newLpApy.feesPayed = BigInt.fromString(poolFeesObj.toString());
-            newLpApy.save();
-            log.info("finish to save {}", ["lp apy fee"]);
+            // save version
+            version = new Version("latest".toString());
+            version.version = 0;
+            version.save();
+
+            // save initial total fees
+            let newTotalFee = new TotalSwapFee("0".toString());
+            newTotalFee.timeStamp = timeStamp.toString();
+            newTotalFee.feesPayed = BigInt.fromString(poolFeesObj.toString());
+            newTotalFee.save();
           }
         }
       }

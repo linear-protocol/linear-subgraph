@@ -27,13 +27,13 @@ type Price @entity{
    price: BigDecimal!
 }
 
-type LpApy @entity{
+type TotalSwapFee @entity{
     id: ID!
     timeStamp: String!
     feesPayed: BigInt! 
 }
 
-type LpApyFlag @entity {
+type Version @entity {
     id: ID!
-    lastApyId: Int!
+    version: Int!
 }
