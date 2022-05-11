@@ -273,7 +273,7 @@ function handleAction(
         let jsonData = json.try_fromString(outcomeLog);
         let jsonObject = jsonData.value.toObject();
         let event = jsonObject.get("event")!;
-        log.info("get ft transer event {}", [event.toString()]);
+        log.info("get ft transfer event {}", [event.toString()]);
 
         if (event.toString() == "ft_transfer") {
           // parse event
@@ -348,12 +348,10 @@ function handleAction(
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.startsWith("EVENT_JSON:")) {
-        log.info("into {}", ["instant unstake"]);
         outcomeLog = outcomeLog.replace("EVENT_JSON:", "");
         let jsonData = json.try_fromString(outcomeLog);
         let jsonObject = jsonData.value.toObject();
         let event = jsonObject.get("event")!;
-        log.info("get instant unstake {}", [event.toString()]);
 
         if (event.toString() == "instant_unstake") {
           // parse event
