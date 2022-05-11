@@ -174,10 +174,10 @@ function handleAction(
           event.toString() == "remove_liquidity"
         ) {
           log.info("start handle {}", ["liquidity"]);
-          const data = jsonObject.get("data")!;
-          const dataArr = data.toArray();
-          const dataObj = dataArr[0].toObject();
-          const account = dataObj.get("account_id")!.toString();
+          let data = jsonObject.get("data")!;
+          let dataArr = data.toArray();
+          let dataObj = dataArr[0].toObject();
+          let account = dataObj.get("account_id")!.toString();
           let user = Account.load(account);
           log.info("create {}", ["user"]);
           // update user
@@ -195,6 +195,36 @@ function handleAction(
               BigInt.fromI32(0)
             );
           }
+        }
+        if (event.toString() == "ft_transfer") {
+          let data = jsonObject.get("data")!;
+          let dataArr = data.toArray();
+          let dataObj = dataArr[0].toObject();
+          let fromAccount = dataObj.get("old_owner_id")!.toString();
+          let toAccount = dataObj.get("new_owner_id")!.toString();
+          let amount = dataObj.get("amount")!.toString();
+          let amountInt = BigInt.fromString(amount);
+          let fromUser = Account.load(fromAccount)!;
+          let toUser = Account.load(toAccount)!;
+          let transferedEvent = FtTransfer.load(receiptHash);
+          if (transferedEvent) {
+            log.error("internal error: {}", ["transfer event"]);
+          } else {
+            transferedEvent = new FtTransfer(receiptHash);
+            transferedEvent.to = toAccount;
+            transferedEvent.from = fromAccount;
+            transferedEvent.amount = amountInt;
+            transferedEvent.timeStamp = timeStamp.toString();
+            transferedEvent.save();
+          }
+          let fromTemp = fromUser.transferedOut!;
+          fromTemp.push(receiptHash);
+          fromUser.transferedOut = fromTemp;
+          fromUser.save();
+          let toTemp = toUser.transferedIn!;
+          toTemp.push(receiptHash);
+          toUser.transferedIn = toTemp;
+          toUser.save();
         }
       }
     }
