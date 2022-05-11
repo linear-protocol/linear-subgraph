@@ -18,10 +18,6 @@ import {
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   const actions = receipt.receipt.actions;
-  const sender_id = receipt.receipt.signerId.toString();
-  const contract_id = receipt.receipt.predecessorId.toString();
-  const receiver_id = receipt.receipt.receiverId.toString();
-  log.info("sender contract receiver", [sender_id, contract_id, receiver_id]);
   for (let i = 0; i < actions.length; i++) {
     handleAction(actions[i], receipt);
   }
@@ -81,8 +77,8 @@ function handleAction(
         const event = jsonObject.get("event")!;
         if (event.toString() == "stake") {
           const data = jsonObject.get("data")!;
-          const dataArr = data.toArray()!;
-          const dataObj = dataArr[0]!.toObject();
+          const dataArr = data.toArray();
+          const dataObj = dataArr[0].toObject();
           const account = dataObj.get("account_id")!.toString();
           const stakeAmountStr = dataObj.get("staked_amount")!.toString();
           const mintedSharesStr = dataObj
@@ -139,8 +135,8 @@ function handleAction(
         if (event.toString() == "unstake") {
           log.info("start handle {}", ["unstake"]);
           const data = jsonObject.get("data")!;
-          const dataArr = data.toArray()!;
-          const dataObj = dataArr[0]!.toObject();
+          const dataArr = data.toArray();
+          const dataObj = dataArr[0].toObject();
           const account = dataObj.get("account_id")!.toString();
           const unstakeAmountStr = dataObj.get("unstaked_amount")!.toString();
           const burnedSharesStr = dataObj.get("burnt_stake_shares")!.toString();
@@ -179,8 +175,8 @@ function handleAction(
         ) {
           log.info("start handle {}", ["liquidity"]);
           const data = jsonObject.get("data")!;
-          const dataArr = data.toArray()!;
-          const dataObj = dataArr[0]!.toObject();
+          const dataArr = data.toArray();
+          const dataObj = dataArr[0].toObject();
           const account = dataObj.get("account_id")!.toString();
           let user = Account.load(account);
           log.info("create {}", ["user"]);
@@ -215,8 +211,8 @@ function handleAction(
         if (event.toString() == "ft_transfer") {
           log.info("start handle {}", ["ft transer"]);
           let data = jsonObject.get("data")!;
-          let dataArr = data.toArray()!;
-          let dataObj = dataArr[0]!.toObject();
+          let dataArr = data.toArray();
+          let dataObj = dataArr[0].toObject();
           let fromAccount = dataObj.get("old_owner_id")!.toString();
           let toAccount = dataObj.get("new_owner_id")!.toString();
           let amount = dataObj.get("amount")!.toString();
@@ -291,8 +287,8 @@ function handleAction(
           log.info("start handle {}", ["instant unstake"]);
           let data = jsonObject.get("data")!;
           log.info("get instant unstake {}", ["data"]);
-          let dataArr = data.toArray()!;
-          let dataObj = dataArr[0]!.toObject();
+          let dataArr = data.toArray();
+          let dataObj = dataArr[0].toObject();
           let account = dataObj.get("account_id")!.toString();
           log.info("get instant unstake {}", ["account"]);
           let unstakeAmountStr = dataObj.get("unstaked_amount")!.toString();
