@@ -112,7 +112,6 @@ function handleAction(
           }
 
           // update price
-          log.info("start handle {}", ["price"]);
           let price = new Price(blockHeight.toString());
           let minted_sharesFloat = BigDecimal.fromString(mintedSharesStr);
           let stakeAmountFloat = BigDecimal.fromString(stakeAmountStr);
@@ -176,7 +175,6 @@ function handleAction(
           event.toString() == "remove_liquidity"
         ) {
           // parse event
-          log.info("start handle {}", ["liquidity"]);
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
@@ -207,8 +205,6 @@ function handleAction(
           let newOwnerId = dataObj.get("new_owner_id")!.toString();
           let amount = dataObj.get("amount")!.toString();
           let amountInt = BigInt.fromString(amount);
-          let fromAccount = Account.load(oldOwnerId)!;
-          let toAccount = Account.load(newOwnerId)!;
 
           // update FT Transfer event
           let transferedEvent = FtTransfer.load(receiptHash);
@@ -223,15 +219,49 @@ function handleAction(
             transferedEvent.save();
           }
 
-          // update transfers in account
-          let fromTemp = fromAccount.transferedOut!;
-          fromTemp.push(receiptHash);
-          fromAccount.transferedOut = fromTemp;
-          fromAccount.save();
-          let toTemp = toAccount.transferedIn!;
-          toTemp.push(receiptHash);
-          toAccount.transferedIn = toTemp;
-          toAccount.save();
+          // update from account
+          let fromAccount = Account.load(oldOwnerId);
+          if (fromAccount) {
+            let temp = fromAccount.transferedOut!;
+            temp.push(receiptHash);
+            fromAccount.transferedOut = temp;
+            fromAccount.save();
+          } else {
+            createAccount(
+              oldOwnerId,
+              timeStamp.toString(),
+              BigInt.fromU64(blockHeight),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              [],
+              [receiptHash],
+              BigInt.zero()
+            );
+          }
+
+          // update to account
+          let toAccount = Account.load(newOwnerId);
+          if (toAccount) {
+            let temp = toAccount.transferedIn!;
+            temp.push(receiptHash);
+            toAccount.transferedIn = temp;
+            toAccount.save();
+          } else {
+            createAccount(
+              newOwnerId,
+              timeStamp.toString(),
+              BigInt.fromU64(blockHeight),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              BigInt.zero(),
+              [receiptHash],
+              [],
+              BigInt.zero()
+            );
+          }
         }
       }
     }
@@ -246,8 +276,6 @@ function handleAction(
         log.info("get ft transer event {}", [event.toString()]);
 
         if (event.toString() == "ft_transfer") {
-          log.info("start handle {}", ["ft transer"]);
-
           // parse event
           let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
@@ -373,7 +401,7 @@ function handleAction(
           // update total swap fee
           let version = Version.load("latest".toString());
           if (version) {
-            // increase version
+            // increment version
             const lastVersion = version.version;
             const lastTotalFee = TotalSwapFee.load(lastVersion.toString())!;
             version.version += 1;

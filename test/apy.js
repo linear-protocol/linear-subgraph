@@ -4,7 +4,7 @@ const { client, getSummaryFromContract, queryLatestPriceFromSubgraph, queryPrice
 async function getLatestFeesPayed() {
   const getLatestQuery = `
     query {
-      lpApies (first: 1, orderBy: timeStamp, orderDirection: desc){
+      totalSwapFees (first: 1, orderBy: timeStamp, orderDirection: desc){
         id
         timeStamp
         feesPayed
@@ -25,7 +25,7 @@ async function getTargetTimeFeesPayed(timeStamp) {
   // 
   const getBeforeFeesPayed = `
     query {
-      lpApies (first: 1, where: {timeStamp_gt: "${timeStamp}"} ){
+      totalSwapFees (first: 1, where: {timeStamp_gt: "${timeStamp}"} ){
         id
         feesPayed
         timeStamp
