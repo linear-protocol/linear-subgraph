@@ -23,7 +23,7 @@ export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   }
 }
 
-function checkAndCreateUser(
+function createAccount(
   id: string,
   startTime: string,
   height: BigInt,
@@ -35,17 +35,17 @@ function checkAndCreateUser(
   transferedOut: string[],
   feesPayed: BigInt
 ): void {
-  let user = new Account(id);
-  user.startTime = startTime;
-  user.height = height;
-  user.mintedLinear = mintedLinear;
-  user.stakedNear = stakedNear;
-  user.unstakeReceivedNear = unstakeReceivedNear;
-  user.unstakeLinear = unstakeLinear;
-  user.transferedIn = transferedIn;
-  user.transferedOut = transferedOut;
-  user.feesPayed = feesPayed;
-  user.save();
+  let account = new Account(id);
+  account.startTime = startTime;
+  account.height = height;
+  account.mintedLinear = mintedLinear;
+  account.stakedNear = stakedNear;
+  account.unstakeReceivedNear = unstakeReceivedNear;
+  account.unstakeLinear = unstakeLinear;
+  account.transferedIn = transferedIn;
+  account.transferedOut = transferedOut;
+  account.feesPayed = feesPayed;
+  account.save();
 }
 
 function handleAction(
@@ -79,21 +79,21 @@ function handleAction(
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
-          const account = dataObj.get("account_id")!.toString();
+          const accountId = dataObj.get("account_id")!.toString();
           const stakeAmountStr = dataObj.get("staked_amount")!.toString();
           const mintedSharesStr = dataObj
             .get("minted_stake_shares")!
             .toString();
           const stakeAmount = BigInt.fromString(stakeAmountStr);
           const minted_shares = BigInt.fromString(mintedSharesStr);
-          let user = Account.load(account);
-          // update user
-          if (!user) {
+          let account = Account.load(accountId);
+          // update account
+          if (!account) {
             let transferedIn: string[] = [];
             let transferedOut: string[] = [];
-            log.info("create user {}", [account]);
-            checkAndCreateUser(
-              account,
+            log.info("create account {}", [accountId]);
+            createAccount(
+              accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               minted_shares,
@@ -105,10 +105,10 @@ function handleAction(
               BigInt.fromI32(0)
             );
           } else {
-            log.info("update user {}", [account]);
-            user.stakedNear += stakeAmount;
-            user.mintedLinear += minted_shares;
-            user.save();
+            log.info("update account {}", [accountId]);
+            account.stakedNear += stakeAmount;
+            account.mintedLinear += minted_shares;
+            account.save();
           }
           // update price
           log.info("start handle {}", ["price"]);
@@ -123,8 +123,7 @@ function handleAction(
         }
       }
     }
-  }
-  if (methodName == "unstake") {
+  } else if (methodName == "unstake") {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.startsWith("EVENT_JSON:")) {
@@ -137,16 +136,16 @@ function handleAction(
           const data = jsonObject.get("data")!;
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
-          const account = dataObj.get("account_id")!.toString();
+          const accountId = dataObj.get("account_id")!.toString();
           const unstakeAmountStr = dataObj.get("unstaked_amount")!.toString();
           const burnedSharesStr = dataObj.get("burnt_stake_shares")!.toString();
           const unstakeAmount = BigInt.fromString(unstakeAmountStr);
           const burnedShares = BigInt.fromString(burnedSharesStr);
-          let user = Account.load(account)!;
-          log.info("find {}", ["user"]);
-          user.unstakeReceivedNear += unstakeAmount;
-          user.unstakeLinear += burnedShares;
-          user.save();
+          let account = Account.load(accountId)!;
+          log.info("find {}", ["account"]);
+          account.unstakeReceivedNear += unstakeAmount;
+          account.unstakeLinear += burnedShares;
+          account.save();
           // update price
           log.info("start handle {}", ["price"]);
           let price = new Price(blockHeight.toString());
@@ -160,8 +159,7 @@ function handleAction(
         }
       }
     }
-  }
-  if (methodName == "add_liquidity" || methodName == "remove_liquidity") {
+  } else if (methodName == "add_liquidity" || methodName == "remove_liquidity") {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.startsWith("EVENT_JSON:")) {
@@ -174,16 +172,16 @@ function handleAction(
           event.toString() == "remove_liquidity"
         ) {
           log.info("start handle {}", ["liquidity"]);
-          let data = jsonObject.get("data")!;
-          let dataArr = data.toArray();
-          let dataObj = dataArr[0].toObject();
-          let account = dataObj.get("account_id")!.toString();
-          let user = Account.load(account);
-          log.info("create {}", ["user"]);
-          // update user
-          if (!user) {
-            checkAndCreateUser(
-              account,
+          const data = jsonObject.get("data")!;
+          const dataArr = data.toArray();
+          const dataObj = dataArr[0].toObject();
+          const accountId = dataObj.get("account_id")!.toString();
+          let account = Account.load(accountId);
+          log.info("create {}", ["account"]);
+          // update account
+          if (!account) {
+            createAccount(
+              accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               BigInt.fromI32(0),
@@ -195,41 +193,39 @@ function handleAction(
               BigInt.fromI32(0)
             );
           }
-        }
-        if (event.toString() == "ft_transfer") {
+        } else if (event.toString() == "ft_transfer") {
           let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
-          let fromAccount = dataObj.get("old_owner_id")!.toString();
-          let toAccount = dataObj.get("new_owner_id")!.toString();
+          let oldOwnerId = dataObj.get("old_owner_id")!.toString();
+          let newOwnerId = dataObj.get("new_owner_id")!.toString();
           let amount = dataObj.get("amount")!.toString();
           let amountInt = BigInt.fromString(amount);
-          let fromUser = Account.load(fromAccount)!;
-          let toUser = Account.load(toAccount)!;
+          let fromAccount = Account.load(oldOwnerId)!;
+          let toAccount = Account.load(newOwnerId)!;
           let transferedEvent = FtTransfer.load(receiptHash);
           if (transferedEvent) {
             log.error("internal error: {}", ["transfer event"]);
           } else {
             transferedEvent = new FtTransfer(receiptHash);
-            transferedEvent.to = toAccount;
-            transferedEvent.from = fromAccount;
+            transferedEvent.to = newOwnerId;
+            transferedEvent.from = oldOwnerId;
             transferedEvent.amount = amountInt;
             transferedEvent.timeStamp = timeStamp.toString();
             transferedEvent.save();
           }
-          let fromTemp = fromUser.transferedOut!;
+          let fromTemp = fromAccount.transferedOut!;
           fromTemp.push(receiptHash);
-          fromUser.transferedOut = fromTemp;
-          fromUser.save();
-          let toTemp = toUser.transferedIn!;
+          fromAccount.transferedOut = fromTemp;
+          fromAccount.save();
+          let toTemp = toAccount.transferedIn!;
           toTemp.push(receiptHash);
-          toUser.transferedIn = toTemp;
-          toUser.save();
+          toAccount.transferedIn = toTemp;
+          toAccount.save();
         }
       }
     }
-  }
-  if (methodName == "ft_transfer" || methodName == "ft_transfer_call") {
+  } else if (methodName == "ft_transfer" || methodName == "ft_transfer_call") {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.startsWith("EVENT_JSON:")) {
@@ -243,31 +239,31 @@ function handleAction(
           let data = jsonObject.get("data")!;
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
-          let fromAccount = dataObj.get("old_owner_id")!.toString();
-          let toAccount = dataObj.get("new_owner_id")!.toString();
+          let oldOwnerId = dataObj.get("old_owner_id")!.toString();
+          let newOwnerId = dataObj.get("new_owner_id")!.toString();
           let amount = dataObj.get("amount")!.toString();
           let amountInt = BigInt.fromString(amount);
-          let fromUser = Account.load(fromAccount);
-          let toUser = Account.load(toAccount);
+          let fromAccount = Account.load(oldOwnerId);
+          let toAccount = Account.load(newOwnerId);
           let transferedEvent = FtTransfer.load(receiptHash);
           if (transferedEvent) {
             log.error("internal error: {}", ["transfer event"]);
           } else {
             transferedEvent = new FtTransfer(receiptHash);
-            transferedEvent.to = toAccount;
-            transferedEvent.from = fromAccount;
+            transferedEvent.to = newOwnerId;
+            transferedEvent.from = oldOwnerId;
             transferedEvent.amount = amountInt;
             transferedEvent.timeStamp = timeStamp.toString();
             transferedEvent.save();
           }
-          if (fromUser) {
-            let temp = fromUser.transferedOut!;
+          if (fromAccount) {
+            let temp = fromAccount.transferedOut!;
             temp.push(receiptHash);
-            fromUser.transferedOut = temp;
-            fromUser.save();
+            fromAccount.transferedOut = temp;
+            fromAccount.save();
           } else {
-            checkAndCreateUser(
-              fromAccount,
+            createAccount(
+              oldOwnerId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               BigInt.fromU32(0),
@@ -279,14 +275,14 @@ function handleAction(
               BigInt.fromI32(0)
             );
           }
-          if (toUser) {
-            let temp = toUser.transferedIn!;
+          if (toAccount) {
+            let temp = toAccount.transferedIn!;
             temp.push(receiptHash);
-            toUser.transferedIn = temp;
-            toUser.save();
+            toAccount.transferedIn = temp;
+            toAccount.save();
           } else {
-            checkAndCreateUser(
-              toAccount,
+            createAccount(
+              newOwnerId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               BigInt.fromU32(0),
@@ -301,9 +297,7 @@ function handleAction(
         }
       }
     }
-  }
-
-  if (methodName == "instant_unstake") {
+  } else if (methodName == "instant_unstake") {
     for (let logIndex = 0; logIndex < outcome.logs.length; logIndex++) {
       let outcomeLog = outcome.logs[logIndex].toString();
       if (outcomeLog.startsWith("EVENT_JSON:")) {
@@ -319,7 +313,7 @@ function handleAction(
           log.info("get instant unstake {}", ["data"]);
           let dataArr = data.toArray();
           let dataObj = dataArr[0].toObject();
-          let account = dataObj.get("account_id")!.toString();
+          let accountId = dataObj.get("account_id")!.toString();
           log.info("get instant unstake {}", ["account"]);
           let unstakeAmountStr = dataObj.get("unstaked_amount")!.toString();
           log.info("get instant unstake {}", ["unstakeAmountStr"]);
@@ -332,11 +326,11 @@ function handleAction(
           let feesPayedStr = dataObj.get("fee_amount")!.toString();
           log.info("get instant unstake {}", ["fee_amount"]);
           let feesPayed = BigInt.fromString(feesPayedStr);
-          let user = Account.load(account)!;
-          log.info("find {}", ["user"]);
-          if (!user) {
-            checkAndCreateUser(
-              account,
+          let account = Account.load(accountId)!;
+          log.info("find {}", ["account"]);
+          if (!account) {
+            createAccount(
+              accountId,
               timeStamp.toString(),
               BigInt.fromU64(blockHeight),
               BigInt.fromU64(0),
@@ -348,10 +342,10 @@ function handleAction(
               BigInt.fromI32(0)
             );
           } else {
-            user.unstakeReceivedNear += unstakeAmount;
-            user.unstakeLinear += unstakeLinearAmount;
-            user.feesPayed += feesPayed;
-            user.save();
+            account.unstakeReceivedNear += unstakeAmount;
+            account.unstakeLinear += unstakeLinearAmount;
+            account.feesPayed += feesPayed;
+            account.save();
           }
         }
 
