@@ -71,9 +71,10 @@ async function calcStakePoolApy() {
   const price1 = new BigNumber(latesdPrice.price)
   const price2 = new BigNumber(price30DaysAgo.price)
   // console.log(latesdPrice, price30DaysAgo)
+  const days = new BigNumber(24 * 60 * 60 * 1000000000 * 30)
   const timeGap = new BigNumber(Number(latesdPrice.timeStamp - price30DaysAgo.timeStamp))
   const times1 = new BigNumber(24 * 60 * 60 * 1000000000 * 365)
-  const apy = price1.minus(price2).times(times1).div(timeGap)
+  const apy = price1.minus(price2).div(price2).times(times1).div(days)
   console.log("Staking APY:", apy.toFixed(4))
 }
 
