@@ -1,0 +1,5 @@
+{
+    "network": "near-testnet",
+    "contract": "linear-protocol.testnet",
+    "startBlock": 84652738
+}

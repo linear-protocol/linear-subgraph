@@ -1,0 +1,24 @@
+specVersion: 0.0.4
+description: LiNEAR Protocol subgraph
+repository: https://github.com/linear-protocol/linear-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: near
+    name: receipts
+    network: {{network}}
+    source:
+      account: "{{contract}}"
+      startBlock: {{startBlock}}
+    mapping:
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mapping/index.ts
+      entities:
+        - Account
+        - LpApy
+        - Price
+        - LpApyFlag
+        - FtTransfer
+      receiptHandlers:
+        - handler: handleReceipt

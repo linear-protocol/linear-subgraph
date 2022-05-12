@@ -1,0 +1,38 @@
+type User @entity{
+   id: ID!
+   mintedLinear: BigInt!
+   unstakedLinear: BigInt!
+   stakedNear: BigInt!
+   unstakeReceivedNear: BigInt!
+   firstStakingTime: BigInt!
+   transferedOut: [FtTransfer!]
+   transferedIn: [FtTransfer!]
+   feesPaid: BigInt!
+}
+
+type FtTransfer @entity {
+    id: ID!
+    to: User!
+    from: User!
+    timestamp: String!
+    amount: BigInt!
+}
+
+type Price @entity{
+   id: ID!
+   timestamp: String!
+   linearAmount: BigDecimal!
+   nearAmount: BigDecimal!
+   price: BigDecimal!
+}
+
+type TotalSwapFee @entity{
+    id: ID!
+    timestamp: String!
+    feesPaid: BigInt!
+}
+
+type Version @entity {
+    id: ID!
+    version: Int!
+}

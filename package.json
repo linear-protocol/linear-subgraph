@@ -1,0 +1,42 @@
+{
+  "name": "linear-subgraph",
+  "version": "0.1.0",
+  "repository": "https://github.com/linear-protocol/linear-subgraph",
+  "license": "MIT",
+  "scripts": {
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:testnet": "mustache config/testnet.json subgraph.template.yaml > subgraph.yaml",
+    "codegen": "graph codegen",
+    "predeploy": "npm run codegen",
+    "deploy": "env-cmd --no-override npm run deploy:hosted",
+    "deploy:hosted": "graph deploy $SLUG --product hosted-service --access-token $ACCESS_TOKEN",
+    "deploy:mainnet": "npm run prepare:mainnet && SLUG=linear-protocol/linear npm run deploy",
+    "deploy:testnet": "npm run prepare:testnet && SLUG=linear-protocol/linear-testnet npm run deploy",
+    "deploy-local": "graph deploy linear --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.23.2",
+    "@graphprotocol/graph-ts": "^0.26.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "env-cmd": "^10.1.0",
+    "eslint": "^6.2.2",
+    "eslint-config-prettier": "^6.1.0",
+    "lint-staged": "^9.2.5",
+    "mustache": "^4.2.0",
+    "prettier": "^1.18.2"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.5.10",
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "big.js": "^6.1.1",
+    "bignumber.js": "^9.0.2",
+    "graphql": "^16.4.0",
+    "isomorphic-unfetch": "^3.1.0",
+    "near-api-js": "^0.44.2",
+    "node-fetch": "^3.2.3",
+    "urql": "^2.2.0"
+  }
+}
