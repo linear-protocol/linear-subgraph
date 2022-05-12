@@ -1,5 +1,6 @@
 const { BigNumber } = require('bignumber.js')
-const { client, getSummaryFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./helper");
+const { client, getSummaryFromContract } = require("./helper");
+const { queryLatestPriceFromSubgraph, queryPriceBefore } = require("./price");
 
 async function getLatestFeesPaid() {
   const getLatestQuery = `

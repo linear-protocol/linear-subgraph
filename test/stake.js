@@ -1,5 +1,6 @@
 const { BigNumber } = require('bignumber.js')
-const { client, loadContract, queryLatestPriceFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./helper");
+const { client, loadContract } = require("./helper");
+const { queryLatestPriceFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./price");
 
 async function queryStakeTime(accountid) {
   const getStakeTimeQuery = `
@@ -78,7 +79,7 @@ async function getUserIncome(accountId, flag) {
         feesPaid
       }
     }`
-  //console.log(finalQuery)
+  // console.log(getIncomeQuery)
   let data = await client.query(getIncomeQuery).toPromise()
   //console.log(data)
   let queryData = data.data.users[0]
@@ -90,7 +91,7 @@ async function getUserIncome(accountId, flag) {
   const price1 = new BigNumber(latestPrice.price)
   const mintedLinear = new BigNumber(queryData.mintedLinear)
   const stakedNear = new BigNumber(queryData.stakedNear)
-  const unstakedLinear = new BigNumber(queryData.unstakeLinear)
+  const unstakedLinear = new BigNumber(queryData.unstakedLinear)
   const unstakedGetNEAR = new BigNumber(queryData.unstakeReceivedNear)
   const fessPaid = new BigNumber(queryData.feesPaid)
   const currentLinear = mintedLinear.minus(unstakedLinear);
