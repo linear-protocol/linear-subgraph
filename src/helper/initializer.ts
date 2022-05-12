@@ -1,6 +1,6 @@
 
 import { BigInt, log } from "@graphprotocol/graph-ts";
-import { User } from "../../../generated/schema";
+import { User } from "../../generated/schema";
 
 export function getOrInitUser(accountId: string): User {
     let user = User.load(accountId);
