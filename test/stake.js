@@ -4,9 +4,9 @@ const { client, loadContract, queryLatestPriceFromContract, queryLatestPriceFrom
 async function queryStakeTime(accountid) {
   const getStakeTimeQuery = `
     query {
-      accounts (fisrt: 1, where: {id: "${accountid}"} ){
+      users (first: 1, where: {id: "${accountid}"} ){
       id
-      startTime
+      firstStakingTime
     }
   }`
   // console.log(getStakeTimeQuery)
@@ -16,49 +16,49 @@ async function queryStakeTime(accountid) {
     console.log("fail to query price")
     return
   }
-  const timeStampInt = new Number(queryData.accounts[0].startTime.toString())
-  const unixTimeStamp = timeStampInt / 1000000
-  const date = new Date(unixTimeStamp)
+  const timestampInt = new Number(queryData.users[0].firstStakingTime.toString())
+  const unixTimestamp = timestampInt / 1000000
+  const date = new Date(unixTimestamp)
   console.log("user first stake time: ", date)
-  return queryData.accounts[0]
+  return queryData.users[0]
 }
 
 async function getTransferIncome(accountID) {
   const getTransferEvent = `
     query {
-      accounts(first: 1,where:{id:"${accountID}"}) {
+      users(first: 1, where:{id:"${accountID}"}) {
         id
         transferedIn {
           amount
-          timeStamp
+          timestamp
         }
         transferedOut {
           amount
-          timeStamp
+          timestamp
         }
       }
   }`
   // console.log(getTransferEvent)
   let data = await client.query(getTransferEvent).toPromise()
   let queryData = data.data
-  //console.log(queryData.accounts[0].transferedIn)
+  //console.log(queryData.users[0].transferedIn)
   if (queryData == null) {
     console.log("fail to query transfer event")
     return
   }
   const latestPrice = await queryLatestPriceFromContract()
   //console.log(latestPrice.price)
-  const transferIn = queryData.accounts[0].transferedIn
-  const transferOut = queryData.accounts[0].transferedOut
+  const transferIn = queryData.users[0].transferedIn
+  const transferOut = queryData.users[0].transferedOut
   let transferInReward = 0;
   let transferOutReward = 0;
   for (let i in transferIn) {
-    let tempPrice = await queryPriceBefore(transferIn[i].timeStamp)
+    let tempPrice = await queryPriceBefore(transferIn[i].timestamp)
     let tmpReward = transferIn[i].amount * (latestPrice.price - tempPrice.price)
     transferInReward += tmpReward;
   }
   for (let i in transferOut) {
-    let tempPrice = await queryPriceBefore(transferOut[i].timeStamp)
+    let tempPrice = await queryPriceBefore(transferOut[i].timestamp)
     let tmpReward = transferOut[i].amount * (latestPrice.price - tempPrice.price)
     transferOutReward += tmpReward;
   }
@@ -69,19 +69,19 @@ async function getTransferIncome(accountID) {
 async function getUserIncome(accountId, flag) {
   const getIncomeQuery = `
     query {
-      accounts (fisrt: 1, where: {id: "${accountId}"} ){
+      users (first: 1, where: {id: "${accountId}"} ){
         id
         mintedLinear
         stakedNear
-        unstakeLinear
+        unstakedLinear
         unstakeReceivedNear
-        feesPayed
+        feesPaid
       }
     }`
   //console.log(finalQuery)
   let data = await client.query(getIncomeQuery).toPromise()
   //console.log(data)
-  let queryData = data.data.accounts[0]
+  let queryData = data.data.users[0]
   if (queryData == null) {
     console.log("fail to query user")
     return
@@ -92,7 +92,7 @@ async function getUserIncome(accountId, flag) {
   const stakedNear = new BigNumber(queryData.stakedNear)
   const unstakedLinear = new BigNumber(queryData.unstakeLinear)
   const unstakedGetNEAR = new BigNumber(queryData.unstakeReceivedNear)
-  const fessPayed = new BigNumber(queryData.feesPayed)
+  const fessPaid = new BigNumber(queryData.feesPaid)
   const currentLinear = mintedLinear.minus(unstakedLinear);
   const transferReward = await getTransferIncome(accountId);
   const tfReward = new BigNumber(transferReward);
@@ -106,7 +106,7 @@ async function getUserIncome(accountId, flag) {
   // );
 
   if (flag) {
-    rewardFinal = reward.plus(fessPayed)
+    rewardFinal = reward.plus(fessPaid)
     console.log("rewards [subgraph with fee] =\t\t %s NEAR", rewardFinal.div(10 ** 24).toFixed(8))
     return rewardFinal
   } else {

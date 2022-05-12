@@ -54,12 +54,12 @@ async function getSummaryFromContract() {
 }
 
 
-async function queryPriceBefore(timeStamp) {
+async function queryPriceBefore(timestamp) {
   const getBeforeQuery = `
     query {
-      prices (fisrt: 1, where: {timeStamp_gt: "${timeStamp}"} ){
+      prices (first: 1, where: {timestamp_gt: "${timestamp}"} ){
         id
-        timeStamp
+        timestamp
         price
       }
     }`
@@ -70,7 +70,7 @@ async function queryPriceBefore(timeStamp) {
     console.log("fail to query price")
     return
   }
-  // console.log("price at %s : %s",timeStamp.toString(),queryData.prices[0].price.toString())
+  // console.log("price at %s : %s",timestamp.toString(),queryData.prices[0].price.toString())
   return queryData.prices[0]
 }
 
@@ -79,7 +79,7 @@ async function queryLatestPriceFromContract() {
   const price = await contract.ft_price();
   return {
     price: price / 10 ** 24,
-    timeStamp: Date.now() * 1000000
+    timestamp: Date.now() * 1000000
   }
 }
 
@@ -87,9 +87,9 @@ async function queryLatestPriceFromContract() {
 async function queryLatestPriceFromSubgraph() {
   const getLatestQuery = `
     query {
-      prices (fisrt: 1, orderBy: id, orderDirection: desc){
+      prices (first: 1, orderBy: id, orderDirection: desc){
         id
-        timeStamp
+        timestamp
         price
       }
     }
