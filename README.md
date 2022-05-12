@@ -1,4 +1,4 @@
-# Subgraph for LiNEAR
+# LiNEAR Protocol subgraph
 
 ## Development
 

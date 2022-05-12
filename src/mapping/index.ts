@@ -7,43 +7,17 @@ import {
 } from "@graphprotocol/graph-ts";
 import {
   Price,
-  Account,
   FtTransfer,
   TotalSwapFee,
   Version
 } from "../../generated/schema";
+import { getOrInitUser } from "./helper/initializer";
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   const actions = receipt.receipt.actions;
   for (let i = 0; i < actions.length; i++) {
     handleAction(actions[i], receipt);
   }
-}
-
-function createAccount(
-  id: string,
-  startTime: string,
-  height: BigInt,
-  mintedLinear: BigInt,
-  stakedNear: BigInt,
-  unstakeReceivedNear: BigInt,
-  unstakeLinear: BigInt,
-  transferedIn: string[],
-  transferedOut: string[],
-  feesPayed: BigInt
-): void {
-  log.info("create account {}", [id]);
-  let account = new Account(id);
-  account.startTime = startTime;
-  account.height = height;
-  account.mintedLinear = mintedLinear;
-  account.stakedNear = stakedNear;
-  account.unstakeReceivedNear = unstakeReceivedNear;
-  account.unstakeLinear = unstakeLinear;
-  account.transferedIn = transferedIn;
-  account.transferedOut = transferedOut;
-  account.feesPayed = feesPayed;
-  account.save();
 }
 
 function handleAction(
@@ -53,7 +27,7 @@ function handleAction(
   if (action.kind != near.ActionKind.FUNCTION_CALL) {
     return;
   }
-  const timeStamp = receiptWithOutcome.block.header.timestampNanosec;
+  const timestamp = receiptWithOutcome.block.header.timestampNanosec;
   const blockHeight = receiptWithOutcome.block.header.height;
   const epochId = receiptWithOutcome.block.header.epochId;
   const outcome = receiptWithOutcome.outcome;
@@ -87,29 +61,11 @@ function handleAction(
           const stakeAmount = BigInt.fromString(stakeAmountStr);
           const minted_shares = BigInt.fromString(mintedSharesStr);
 
-          // update account
-          let account = Account.load(accountId);
-          if (!account) {
-            let transferedIn: string[] = [];
-            let transferedOut: string[] = [];
-            createAccount(
-              accountId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              minted_shares,
-              stakeAmount,
-              BigInt.zero(),
-              BigInt.zero(),
-              transferedIn,
-              transferedOut,
-              BigInt.zero()
-            );
-          } else {
-            log.info("update account {}", [accountId]);
-            account.stakedNear += stakeAmount;
-            account.mintedLinear += minted_shares;
-            account.save();
-          }
+          // update user
+          let user = getOrInitUser(accountId);
+          user.stakedNear = user.stakedNear.plus(stakeAmount);
+          user.mintedLinear = user.mintedLinear.plus(minted_shares);
+          user.save();
 
           // update price
           let price = new Price(blockHeight.toString());
@@ -117,7 +73,7 @@ function handleAction(
           let stakeAmountFloat = BigDecimal.fromString(stakeAmountStr);
           price.linearAmount = minted_sharesFloat;
           price.nearAmount = stakeAmountFloat;
-          price.timeStamp = timeStamp.toString();
+          price.timestamp = timestamp.toString();
           price.price = stakeAmountFloat.div(minted_sharesFloat);
           price.save();
         }
@@ -143,11 +99,11 @@ function handleAction(
           const unstakeAmount = BigInt.fromString(unstakeAmountStr);
           const burnedShares = BigInt.fromString(burnedSharesStr);
 
-          // update account
-          let account = Account.load(accountId)!;
-          account.unstakeReceivedNear += unstakeAmount;
-          account.unstakeLinear += burnedShares;
-          account.save();
+          // update user
+          let user = getOrInitUser(accountId);
+          user.unstakeReceivedNear = user.unstakeReceivedNear.plus(unstakeAmount);
+          user.unstakedLinear = user.unstakedLinear.plus(burnedShares);
+          user.save();
 
           // update price
           let price = new Price(blockHeight.toString());
@@ -155,7 +111,7 @@ function handleAction(
           const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr);
           price.nearAmount = unstakeSharesFloat;
           price.linearAmount = burnedSharesFloat;
-          price.timeStamp = timeStamp.toString();
+          price.timestamp = timestamp.toString();
           price.price = unstakeSharesFloat.div(burnedSharesFloat);
           price.save();
         }
@@ -179,23 +135,11 @@ function handleAction(
           const dataArr = data.toArray();
           const dataObj = dataArr[0].toObject();
           const accountId = dataObj.get("account_id")!.toString();
-          let account = Account.load(accountId);
 
-          // update account
-          if (!account) {
-            createAccount(
-              accountId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              [],
-              [],
-              BigInt.zero()
-            );
-          }
+          // update user
+          let user = getOrInitUser(accountId);
+          user.firstStakingTime = BigInt.fromU64(timestamp);
+          user.save();
         } else if (event.toString() == "ft_transfer") {
           // parse event
           let data = jsonObject.get("data")!;
@@ -215,53 +159,23 @@ function handleAction(
             transferedEvent.to = newOwnerId;
             transferedEvent.from = oldOwnerId;
             transferedEvent.amount = amountInt;
-            transferedEvent.timeStamp = timeStamp.toString();
+            transferedEvent.timestamp = timestamp.toString();
             transferedEvent.save();
           }
 
-          // update from account
-          let fromAccount = Account.load(oldOwnerId);
-          if (fromAccount) {
-            let temp = fromAccount.transferedOut!;
-            temp.push(receiptHash);
-            fromAccount.transferedOut = temp;
-            fromAccount.save();
-          } else {
-            createAccount(
-              oldOwnerId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              [],
-              [receiptHash],
-              BigInt.zero()
-            );
-          }
+          // update from user
+          let fromUser = getOrInitUser(oldOwnerId);
+          let temp = fromUser.transferedOut!;
+          temp.push(receiptHash);
+          fromUser.transferedOut = temp;
+          fromUser.save();
 
-          // update to account
-          let toAccount = Account.load(newOwnerId);
-          if (toAccount) {
-            let temp = toAccount.transferedIn!;
-            temp.push(receiptHash);
-            toAccount.transferedIn = temp;
-            toAccount.save();
-          } else {
-            createAccount(
-              newOwnerId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              [receiptHash],
-              [],
-              BigInt.zero()
-            );
-          }
+          // update to user
+          let toUser = getOrInitUser(newOwnerId);
+          temp = toUser.transferedIn!;
+          temp.push(receiptHash);
+          toUser.transferedIn = temp;
+          toUser.save();
         }
       }
     }
@@ -294,53 +208,23 @@ function handleAction(
             transferedEvent.to = newOwnerId;
             transferedEvent.from = oldOwnerId;
             transferedEvent.amount = amountInt;
-            transferedEvent.timeStamp = timeStamp.toString();
+            transferedEvent.timestamp = timestamp.toString();
             transferedEvent.save();
           }
 
-          // update from account
-          let fromAccount = Account.load(oldOwnerId);
-          if (fromAccount) {
-            let temp = fromAccount.transferedOut!;
-            temp.push(receiptHash);
-            fromAccount.transferedOut = temp;
-            fromAccount.save();
-          } else {
-            createAccount(
-              oldOwnerId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              [],
-              [receiptHash],
-              BigInt.zero()
-            );
-          }
+          // update from user
+          let fromUser = getOrInitUser(oldOwnerId);
+          let temp = fromUser.transferedOut!;
+          temp.push(receiptHash);
+          fromUser.transferedOut = temp;
+          fromUser.save();
 
-          // update to account
-          let toAccount = Account.load(newOwnerId);
-          if (toAccount) {
-            let temp = toAccount.transferedIn!;
-            temp.push(receiptHash);
-            toAccount.transferedIn = temp;
-            toAccount.save();
-          } else {
-            createAccount(
-              newOwnerId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              BigInt.zero(),
-              [receiptHash],
-              [],
-              BigInt.zero()
-            );
-          }
+          // update to user
+          let toUser = getOrInitUser(newOwnerId);
+          temp = toUser.transferedIn!;
+          temp.push(receiptHash);
+          toUser.transferedIn = temp;
+          toUser.save();
         }
       }
     }
@@ -365,30 +249,15 @@ function handleAction(
             .toString();
           let unstakeAmount = BigInt.fromString(unstakeAmountStr);
           let unstakeLinearAmount = BigInt.fromString(unstakeLinearAmountStr);
-          let feesPayedStr = dataObj.get("fee_amount")!.toString();
-          let feesPayed = BigInt.fromString(feesPayedStr);
+          let feesPaidStr = dataObj.get("fee_amount")!.toString();
+          let feesPaid = BigInt.fromString(feesPaidStr);
 
-          // update account
-          let account = Account.load(accountId)!;
-          if (!account) {
-            createAccount(
-              accountId,
-              timeStamp.toString(),
-              BigInt.fromU64(blockHeight),
-              BigInt.zero(),
-              BigInt.zero(),
-              unstakeAmount,
-              unstakeLinearAmount,
-              [],
-              [],
-              BigInt.zero()
-            );
-          } else {
-            account.unstakeReceivedNear += unstakeAmount;
-            account.unstakeLinear += unstakeLinearAmount;
-            account.feesPayed += feesPayed;
-            account.save();
-          }
+          // update user
+          let user = getOrInitUser(accountId);
+          user.unstakeReceivedNear = user.unstakeReceivedNear.plus(unstakeAmount);
+          user.unstakedLinear = user.unstakedLinear.plus(unstakeLinearAmount);
+          user.feesPaid = user.feesPaid.plus(feesPaid);
+          user.save();
         } else if (event.toString() == "liquidity_pool_swap_fee") {
           // parse event
           let data = jsonObject.get("data")!;
@@ -404,14 +273,14 @@ function handleAction(
             const lastTotalFee = TotalSwapFee.load(lastVersion.toString())!;
             version.version += 1;
             version.save();
-            const lastFees = lastTotalFee.feesPayed;
+            const lastFees = lastTotalFee.feesPaid;
 
             // save latest total fees
             const newVersion = lastVersion + 1;
             let newTotalFee = new TotalSwapFee(newVersion.toString());
-            newTotalFee.timeStamp = timeStamp.toString();
-            newTotalFee.feesPayed =
-              lastFees + BigInt.fromString(poolFeesObj.toString());
+            newTotalFee.timestamp = timestamp.toString();
+            newTotalFee.feesPaid =
+              lastFees.plus(BigInt.fromString(poolFeesObj.toString()));
             newTotalFee.save();
           } else {
             // save version
@@ -421,8 +290,8 @@ function handleAction(
 
             // save initial total fees
             let newTotalFee = new TotalSwapFee("0".toString());
-            newTotalFee.timeStamp = timeStamp.toString();
-            newTotalFee.feesPayed = BigInt.fromString(poolFeesObj.toString());
+            newTotalFee.timestamp = timestamp.toString();
+            newTotalFee.feesPaid = BigInt.fromString(poolFeesObj.toString());
             newTotalFee.save();
           }
         }
