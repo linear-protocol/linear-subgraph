@@ -15,8 +15,7 @@ async function getLatestFeesPaid() {
   let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query latest totalSwapFees")
-    return
+    throw new Error("fail to query latest totalSwapFees")
   }
   // console.log("current fees: ", queryData.totalSwapFees[0].feesPaid.toString())
   return queryData.totalSwapFees[0]
@@ -37,8 +36,7 @@ async function getTargetTimeFeesPaid(timestamp) {
   let data = await client.query(getBeforeFeesPayed).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query before totalSwapFees")
-    return
+    throw new Error("fail to query before totalSwapFees")
   }
   //console.log(queryData)
   // console.log("init fees: ", queryData.totalSwapFees[0].feesPaid)

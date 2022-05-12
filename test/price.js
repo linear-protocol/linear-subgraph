@@ -1,4 +1,5 @@
 
+const { utils } = require('near-api-js')
 const { client, loadContract } = require("./helper");
 
 async function queryPriceBefore(timestamp) {
@@ -25,7 +26,7 @@ async function queryLatestPriceFromContract() {
   const contract = await loadContract();
   const price = await contract.ft_price();
   return {
-    price: price / 10 ** 24,
+    price: utils.format.formatNearAmount(price),
     timestamp: Date.now() * 1000000
   }
 }
