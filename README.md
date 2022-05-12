@@ -8,7 +8,7 @@
 cp .env.example .env
 # install project dependencies
 npm i
-# prepare subgraphy.yml
+# prepare subgraph.yaml
 npm run prepare:mainnet
 # run codegen
 npm run codegen
