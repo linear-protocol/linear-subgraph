@@ -71,10 +71,10 @@
     "which" "2.0.2"
     "yaml" "^1.5.1"
 
-"@graphprotocol/graph-ts@^0.23.1":
-  "integrity" "sha512-pipofvN1LlwLOXrS7IWy8hSBFZzVyVHdLXDpQskl9nKqdbb3chelj4JoVEzCl7klvomDpP84ngLpW17fBh5vww=="
-  "resolved" "https://registry.npmjs.org/@graphprotocol/graph-ts/-/graph-ts-0.23.1.tgz"
-  "version" "0.23.1"
+"@graphprotocol/graph-ts@^0.26.0":
+  "integrity" "sha512-GW/emOJl+35MXgmIxTnUK7dJtPCaB9u5aAwoLVqJ8swogC794O92UrXMVrAJsherUriu+yI9bLMGmNPOIi60jw=="
+  "resolved" "https://registry.npmjs.org/@graphprotocol/graph-ts/-/graph-ts-0.26.0.tgz"
+  "version" "0.26.0"
   dependencies:
     "assemblyscript" "0.19.10"
 
