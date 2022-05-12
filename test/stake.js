@@ -14,10 +14,9 @@ async function queryStakeTime(accountid) {
   let data = await client.query(getStakeTimeQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query price")
-    return
+    throw new Error("fail to query price");
   }
-  const timestampInt = new Number(queryData.users[0].firstStakingTime.toString())
+  const timestampInt = Number(queryData.users[0].firstStakingTime.toString())
   const unixTimestamp = timestampInt / 1000000
   const date = new Date(unixTimestamp)
   console.log("user first stake time: ", date)
@@ -44,8 +43,7 @@ async function getTransferIncome(accountID) {
   let queryData = data.data
   //console.log(queryData.users[0].transferedIn)
   if (queryData == null) {
-    console.log("fail to query transfer event")
-    return
+    throw new Error("fail to query transfer event")
   }
   const latestPrice = await queryLatestPriceFromContract()
   //console.log(latestPrice.price)
@@ -84,8 +82,7 @@ async function getUserIncome(accountId, flag) {
   //console.log(data)
   let queryData = data.data.users[0]
   if (queryData == null) {
-    console.log("fail to query user")
-    return
+    throw new Error("fail to query user")
   }
   const latestPrice = await queryLatestPriceFromSubgraph()
   const price1 = new BigNumber(latestPrice.price)
@@ -107,7 +104,7 @@ async function getUserIncome(accountId, flag) {
   // );
 
   if (flag) {
-    rewardFinal = reward.plus(fessPaid)
+    const rewardFinal = reward.plus(fessPaid)
     console.log("rewards [subgraph with fee] =\t\t %s NEAR", rewardFinal.div(10 ** 24).toFixed(8))
     return rewardFinal
   } else {

@@ -15,8 +15,7 @@ async function queryPriceBefore(timestamp) {
   let data = await client.query(getBeforeQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query price")
-    return
+    throw new Error("fail to query price")
   }
   // console.log("price at %s : %s",timestamp.toString(),queryData.prices[0].price.toString())
   return queryData.prices[0]
@@ -44,8 +43,7 @@ async function queryLatestPriceFromSubgraph() {
   let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query price")
-    return
+    throw new Error("fail to query price")
   }
   // console.log("current price: ",queryData.prices[0].price.toString())
   return queryData.prices[0]
