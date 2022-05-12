@@ -60,7 +60,7 @@ async function calcLpApy() {
   // console.log("days", days.toString())
   const feesCurrent = new BigNumber(tmpFeesPaid.feesPaid)
   const feesInit = new BigNumber(initFeesPayed.feesPaid)
-  console.log("feesCurrent,feesInit", feesCurrent.toString(), feesInit.toString())
+  // console.log("feesCurrent,feesInit", feesCurrent.toString(), feesInit.toString())
   const lpApy = feesCurrent.minus(feesInit).div(days).times(365).times(tmpPrice).div(tmpLpTVL)
   console.log("Liquidity Pool APY:", lpApy.toFixed(4));
 }
@@ -75,6 +75,12 @@ async function calcStakePoolApy() {
   const days = new BigNumber(24 * 60 * 60 * 1000000000 * 30)
   const timeGap = new BigNumber(Number(latesdPrice.timestamp - price30DaysAgo.timestamp))
   const times1 = new BigNumber(24 * 60 * 60 * 1000000000 * 365)
+  // console.log('prices',
+  //   price1.toString(),
+  //   price2.toString(),
+  //   new Date(latesdPrice.timestamp / 1000000),
+  //   new Date(price30DaysAgo.timestamp / 1000000),
+  // );
   const apy = price1.minus(price2).div(price2).times(times1).div(days)
   console.log("Staking APY:", apy.toFixed(4))
 }
