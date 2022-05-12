@@ -14,11 +14,11 @@ async function getLatestFeesPayed() {
   let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query latest lpApies")
+    console.log("fail to query latest totalSwapFees")
     return
   }
-  // console.log("current fees: ", queryData.lpApies[0].feesPayed.toString())
-  return queryData.lpApies[0]
+  // console.log("current fees: ", queryData.totalSwapFees[0].feesPayed.toString())
+  return queryData.totalSwapFees[0]
 }
 
 async function getTargetTimeFeesPayed(timeStamp) {
@@ -35,12 +35,12 @@ async function getTargetTimeFeesPayed(timeStamp) {
   let data = await client.query(getBeforeFeesPayed).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query before lpApies")
+    console.log("fail to query before totalSwapFees")
     return
   }
   //console.log(queryData)
-  // console.log("init fees: ", queryData.lpApies[0].feesPayed)
-  return queryData.lpApies[0]
+  // console.log("init fees: ", queryData.totalSwapFees[0].feesPayed)
+  return queryData.totalSwapFees[0]
 }
 
 async function calcLpApy() {
