@@ -65,6 +65,9 @@ function handleAction(
           let user = getOrInitUser(accountId);
           user.stakedNear = user.stakedNear.plus(stakeAmount);
           user.mintedLinear = user.mintedLinear.plus(minted_shares);
+          if (user.firstStakingTime.isZero()) {
+            user.firstStakingTime = BigInt.fromU64(timestamp);
+          }
           user.save();
 
           // update price
@@ -130,16 +133,7 @@ function handleAction(
           event.toString() == "add_liquidity" ||
           event.toString() == "remove_liquidity"
         ) {
-          // parse event
-          const data = jsonObject.get("data")!;
-          const dataArr = data.toArray();
-          const dataObj = dataArr[0].toObject();
-          const accountId = dataObj.get("account_id")!.toString();
-
-          // update user
-          let user = getOrInitUser(accountId);
-          user.firstStakingTime = BigInt.fromU64(timestamp);
-          user.save();
+          // skip
         } else if (event.toString() == "ft_transfer") {
           // parse event
           let data = jsonObject.get("data")!;

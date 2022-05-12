@@ -29,7 +29,7 @@ type Price @entity{
 type TotalSwapFee @entity{
     id: ID!
     timestamp: String!
-    feesPaid: BigInt! 
+    feesPaid: BigInt!
 }
 
 type Version @entity {
