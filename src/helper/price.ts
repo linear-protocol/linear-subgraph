@@ -1,16 +1,6 @@
 import { near, BigInt, BigDecimal } from '@graphprotocol/graph-ts';
-import { Price, Status } from '../../generated/schema';
+import { Price } from '../../generated/schema';
 import { getOrInitPrice, getOrInitStatus } from './initializer';
-
-export function getLatestPrice(): Price | null {
-  const status = getOrInitStatus();
-  if (status != null) {
-    const price = Price.load(status.priceVersion.toString())!;
-    return price as Price;
-  } else {
-    return null;
-  }
-}
 
 export function updatePrice(
   event: string,
