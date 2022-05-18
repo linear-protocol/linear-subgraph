@@ -8,7 +8,5 @@ export function handleEpochUpdateRewards(
   receipt: near.ReceiptWithOutcome
 ): void {
   const rewards = BigDecimal.fromString(data.get('rewards')!.toString());
-
-  // update price
   updatePrice(event, method, receipt, rewards, BigDecimal.zero());
 }

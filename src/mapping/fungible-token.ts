@@ -17,10 +17,12 @@ export function handleFtTransfer(
   const timestamp = receipt.block.header.timestampNanosec;
   const receiptHash = receipt.receipt.id.toBase58();
 
+  // parse event
   const oldOwnerId = data.get('old_owner_id')!.toString();
   const newOwnerId = data.get('new_owner_id')!.toString();
   const amount = BigInt.fromString(data.get('amount')!.toString());
   const amountFloat = BigDecimal.fromString(data.get('amount')!.toString());
+
   // update event
   let transferedEvent = FtTransfer.load(receiptHash);
   if (!transferedEvent) {
@@ -62,8 +64,6 @@ export function handleFtBurn(
   receipt: near.ReceiptWithOutcome
 ): void {
   const amount = BigDecimal.fromString(data.get('amount')!.toString());
-
-  // update price
   updatePrice(event, method, receipt, BigDecimal.zero(), amount.neg());
 }
 
@@ -74,7 +74,5 @@ export function handleFtMint(
   receipt: near.ReceiptWithOutcome
 ): void {
   const amount = BigDecimal.fromString(data.get('amount')!.toString());
-
-  // update price
   updatePrice(event, method, receipt, BigDecimal.zero(), amount);
 }

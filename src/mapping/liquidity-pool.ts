@@ -5,7 +5,6 @@ import {
   TypedMap,
   BigDecimal,
 } from '@graphprotocol/graph-ts';
-import { TotalSwapFee } from '../../generated/schema';
 import {
   getOrInitUser,
   getOrInitStatus,
@@ -65,7 +64,6 @@ export function handleRebalanceLiquidity(
   const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
   const increasedAmountFloat = BigDecimal.fromString(increaseAmountStr);
 
-  // update price
   updatePrice(
     event,
     method,
