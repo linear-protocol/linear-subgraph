@@ -15,11 +15,10 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mapping/index.ts
       entities:
-        - Account
-        - LpApy
+        - User
         - Price
-        - LpApyFlag
+        - TotalSwapFee
+        - Status
         - FtTransfer
-        - PriceVersion
       receiptHandlers:
         - handler: handleReceipt
