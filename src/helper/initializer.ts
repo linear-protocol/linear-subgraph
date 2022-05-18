@@ -1,5 +1,5 @@
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
-import { Price, User, Status } from '../../generated/schema';
+import { Price, User, Status, TotalSwapFee } from '../../generated/schema';
 
 export function getOrInitUser(accountId: string): User {
   let user = User.load(accountId);
@@ -46,9 +46,21 @@ export function getOrInitStatus(): Status {
   let status = Status.load('status');
   if (!status) {
     status = new Status('status');
-    status.priceVersion = BigInt.zero();
     status.price = BigDecimal.zero();
+    status.priceVersion = BigInt.zero();
+    status.totalSwapFeeVersion = BigInt.zero();
     status.save();
   }
   return status as Status;
+}
+
+export function getOrInitTotalSwapFee(version: string): TotalSwapFee {
+  let totalSwapFee = TotalSwapFee.load(version);
+  if (!totalSwapFee) {
+    totalSwapFee = new TotalSwapFee(version);
+    totalSwapFee.timestamp = BigInt.zero();
+    totalSwapFee.feesPaid = BigInt.zero();
+    totalSwapFee.save();
+  }
+  return totalSwapFee as TotalSwapFee;
 }

@@ -26,6 +26,7 @@ export function handleFtTransfer(
   if (!transferedEvent) {
     const status = getOrInitStatus();
     const latestPrice = status.price;
+
     transferedEvent = new FtTransfer(receiptHash);
     transferedEvent.to = newOwnerId;
     transferedEvent.from = oldOwnerId;
@@ -50,7 +51,7 @@ export function handleFtTransfer(
     toUser.transferedInShares = amount.plus(toUser.transferedInShares);
     toUser.save();
   } else {
-    log.error('internal error: {}', ['transfer event']);
+    log.error('Internal Error: {}', ['FtTransfer Event']);
   }
 }
 

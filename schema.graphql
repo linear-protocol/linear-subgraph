@@ -12,15 +12,6 @@ type User @entity{
    feesPaid: BigInt!
 }
 
-type FtTransfer @entity {
-    id: ID!
-    to: User!
-    from: User!
-    timestamp: String!
-    price: BigDecimal!
-    amount: BigInt!
-}
-
 type Price @entity{
    id: ID!
    timestamp: BigInt!
@@ -34,19 +25,26 @@ type Price @entity{
    price: BigDecimal!
 }
 
-type Status @entity{
-    id: ID!
-    priceVersion: BigInt!
-    price: BigDecimal!
-}
-
 type TotalSwapFee @entity{
     id: ID!
-    timestamp: String!
+    timestamp: BigInt!
     feesPaid: BigInt!
 }
 
-type Version @entity {
+# Records the latest versions and statues
+type Status @entity{
     id: ID!
-    version: Int!
+    price: BigDecimal!
+    priceVersion: BigInt!
+    totalSwapFeeVersion: BigInt!
+}
+
+# Raw NEP-297 Events
+type FtTransfer @entity {
+    id: ID!
+    to: User!
+    from: User!
+    timestamp: String!
+    price: BigDecimal!
+    amount: BigInt!
 }

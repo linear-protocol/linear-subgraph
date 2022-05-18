@@ -3,9 +3,9 @@ import { Price, Status } from '../../generated/schema';
 import { getOrInitPrice, getOrInitStatus } from './initializer';
 
 export function getLatestPrice(): Price | null {
-  let status = Status.load('price');
+  const status = getOrInitStatus();
   if (status != null) {
-    let price = Price.load(status.priceVersion.toString())!;
+    const price = Price.load(status.priceVersion.toString())!;
     return price as Price;
   } else {
     return null;
