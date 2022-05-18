@@ -13,7 +13,8 @@
     "deploy:mainnet": "npm run prepare:mainnet && SLUG=linear-protocol/linear npm run deploy",
     "deploy:testnet": "npm run prepare:testnet && SLUG=linear-protocol/linear-testnet npm run deploy",
     "deploy-local": "graph deploy linear --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.23.2",
@@ -23,6 +24,7 @@
     "env-cmd": "^10.1.0",
     "eslint": "^6.2.2",
     "eslint-config-prettier": "^6.1.0",
+    "husky": "^8.0.1",
     "lint-staged": "^9.2.5",
     "mustache": "^4.2.0",
     "prettier": "^1.18.2"
