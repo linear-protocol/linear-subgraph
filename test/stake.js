@@ -1,6 +1,6 @@
 const { BigNumber } = require('bignumber.js')
 const { client, loadContract } = require("./helper");
-const { queryLatestPriceFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./price");
+const { queryLatestPriceFromSubgraph } = require("./price");
 
 async function queryStakeTime(accountid) {
   const getStakeTimeQuery = `
@@ -39,8 +39,7 @@ async function getTransferIncome(accountID) {
   let queryData = data.data
   //console.log(queryData.users[0])
   if (queryData == null) {
-    console.log("fail to query transfer event")
-    return
+    throw new Error("Fail to query transfer event")
   }
   const latestPrice = await queryLatestPriceFromSubgraph()
   //console.log(latestPrice.price)
@@ -172,4 +171,3 @@ async function test() {
 }
 
 test();
-//getUserIncome("cookiemonster.near",true)
