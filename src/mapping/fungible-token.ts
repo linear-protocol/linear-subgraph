@@ -1,6 +1,14 @@
-import { near, BigInt, log, JSONValue, TypedMap, BigDecimal } from '@graphprotocol/graph-ts';
-import { FtTransfer, PriceVersion } from '../../generated/schema';
-import { getOrInitUser, getOrInitPrice } from '../helper/initializer';
+import {
+  near,
+  BigInt,
+  log,
+  JSONValue,
+  TypedMap,
+  BigDecimal,
+} from '@graphprotocol/graph-ts';
+import { FtTransfer } from '../../generated/schema';
+import { getOrInitUser, getOrInitStatus } from '../helper/initializer';
+import { updatePrice } from '../helper/price';
 
 export function handleFtTransfer(
   data: TypedMap<string, JSONValue>,
@@ -16,8 +24,8 @@ export function handleFtTransfer(
   // update event
   let transferedEvent = FtTransfer.load(receiptHash);
   if (!transferedEvent) {
-    const priceVersion = PriceVersion.load('price')!;
-    const latestPrice = priceVersion.latestPrice;
+    const status = getOrInitStatus();
+    const latestPrice = status.latestPrice;
     transferedEvent = new FtTransfer(receiptHash);
     transferedEvent.to = newOwnerId;
     transferedEvent.from = oldOwnerId;
@@ -28,20 +36,18 @@ export function handleFtTransfer(
 
     // update from user
     let fromUser = getOrInitUser(oldOwnerId);
-    let temp = fromUser.transferedOut!;
-    fromUser.transferedOutValue = amountFloat.times(latestPrice).plus(fromUser.transferedOutValue);
+    fromUser.transferedOutValue = amountFloat
+      .times(latestPrice)
+      .plus(fromUser.transferedOutValue);
     fromUser.transferedOutShares = amount.plus(fromUser.transferedOutShares);
-    temp.push(receiptHash);
-    fromUser.transferedOut = temp;
     fromUser.save();
 
     // update to user
     let toUser = getOrInitUser(newOwnerId);
-    toUser.transferedInValue = amountFloat.times(latestPrice).plus(toUser.transferedInValue);
+    toUser.transferedInValue = amountFloat
+      .times(latestPrice)
+      .plus(toUser.transferedInValue);
     toUser.transferedInShares = amount.plus(toUser.transferedInShares);
-    temp = toUser.transferedIn!;
-    temp.push(receiptHash);
-    toUser.transferedIn = temp;
     toUser.save();
   } else {
     log.error('internal error: {}', ['transfer event']);
@@ -49,57 +55,25 @@ export function handleFtTransfer(
 }
 
 export function handleFtBurn(
+  method: string,
+  event: string,
   data: TypedMap<string, JSONValue>,
   receipt: near.ReceiptWithOutcome
 ): void {
-  const timestamp = receipt.block.header.timestampNanosec;
-  const receiptHash = receipt.receipt.id.toBase58();
-
   const amount = BigDecimal.fromString(data.get('amount')!.toString());
-  let priceVersion = PriceVersion.load('price')!;
-  let lastPrice = getOrInitPrice(priceVersion.lastPriceID.toString())!;
-  let nextPrice = getOrInitPrice(priceVersion.nextPriceID.toString())!;
-  // create new price
-  nextPrice.deltaLinearAmount = amount;
-  nextPrice.totalNearAmount = lastPrice.totalNearAmount;
-  nextPrice.totalLinearAmount = lastPrice.totalLinearAmount.minus(amount);
-  nextPrice.price = nextPrice.totalNearAmount.div(nextPrice.totalLinearAmount);
-  nextPrice.timeStamp = BigInt.fromU64(timestamp);
-  nextPrice.event = 'ft_burn';
-  nextPrice.receiptHash = receiptHash;
-  nextPrice.method = 'storage_unregister';
-  nextPrice.save();
-  // update price version
-  priceVersion.lastPriceID = priceVersion.nextPriceID;
-  priceVersion.nextPriceID = priceVersion.nextPriceID.plus(BigInt.fromU32(1));
-  priceVersion.latestPrice = nextPrice.price;
-  priceVersion.save();
+
+  // update price
+  updatePrice(event, method, receipt, BigDecimal.zero(), amount.neg());
 }
 
 export function handleFtMint(
+  method: string,
+  event: string,
   data: TypedMap<string, JSONValue>,
   receipt: near.ReceiptWithOutcome
 ): void {
-  const timestamp = receipt.block.header.timestampNanosec;
-  const receiptHash = receipt.receipt.id.toBase58();
-
   const amount = BigDecimal.fromString(data.get('amount')!.toString());
-  let priceVersion = PriceVersion.load('price')!;
-  let lastPrice = getOrInitPrice(priceVersion.lastPriceID.toString())!;
-  let nextPrice = getOrInitPrice(priceVersion.nextPriceID.toString())!;
-  // create new price
-  nextPrice.deltaLinearAmount = amount;
-  nextPrice.totalNearAmount = lastPrice.totalNearAmount;
-  nextPrice.totalLinearAmount = lastPrice.totalLinearAmount.plus(amount);
-  nextPrice.price = nextPrice.totalNearAmount.div(nextPrice.totalLinearAmount);
-  nextPrice.timeStamp = BigInt.fromU64(timestamp);
-  nextPrice.event = 'ft_mint';
-  nextPrice.receiptHash = receiptHash;
-  nextPrice.method = 'epoch_update_rewards';
-  nextPrice.save();
-  // update price version
-  priceVersion.lastPriceID = priceVersion.nextPriceID;
-  priceVersion.nextPriceID = priceVersion.nextPriceID.plus(BigInt.fromU32(1));
-  priceVersion.latestPrice = nextPrice.price;
-  priceVersion.save();
+
+  // update price
+  updatePrice(event, method, receipt, BigDecimal.zero(), amount);
 }

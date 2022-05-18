@@ -20,15 +20,15 @@ function handleEvent(
     method == 'stake_all'
   ) {
     if (event == 'stake') {
-      handleStake(data, receipt, method);
+      handleStake(method, event, data, receipt);
     } else if (event == 'rebalance_liquidity') {
-      handleRebalanceLiquidity(data, receipt, method);
+      handleRebalanceLiquidity(method, event, data, receipt);
     }
   } else if (
     (method == 'unstake' || method == 'unstake_all') &&
     event == 'unstake'
   ) {
-    handleUnstake(data, receipt, method);
+    handleUnstake(method, event, data, receipt);
   } else if (method == 'instant_unstake' && event == 'instant_unstake') {
     handleInstantUnstake(data);
   } else if (
@@ -44,15 +44,15 @@ function handleEvent(
   ) {
     handleLiquidityPoolSwapFee(data, receipt);
   } else if (method == 'storage_unregister' && event == 'ft_burn') {
-    handleFtBurn(data, receipt);
+    handleFtBurn(method, event, data, receipt);
   } else if (
     method == 'epoch_update_rewards' ||
     method == 'validator_get_balance_callback'
   ) {
     if (event == 'epoch_update_rewards') {
-      handleEpochUpdateRewards(data, receipt);
+      handleEpochUpdateRewards(method, event, data, receipt);
     } else if (event == 'ft_mint') {
-      handleFtMint(data, receipt);
+      handleFtMint(method, event, data, receipt);
     }
   }
 }

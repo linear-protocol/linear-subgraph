@@ -1,7 +1,13 @@
-import { near, BigInt, JSONValue, TypedMap, BigDecimal } from '@graphprotocol/graph-ts';
+import {
+  near,
+  BigInt,
+  JSONValue,
+  TypedMap,
+  BigDecimal,
+} from '@graphprotocol/graph-ts';
 import { TotalSwapFee, Version } from '../../generated/schema';
-import { getOrInitUser, getOrInitPrice } from '../helper/initializer';
-import { PriceVersion } from '../../generated/schema';
+import { getOrInitUser } from '../helper/initializer';
+import { updatePrice } from '../helper/price';
 
 export function handleInstantUnstake(data: TypedMap<string, JSONValue>): void {
   // parse event
@@ -59,35 +65,23 @@ export function handleLiquidityPoolSwapFee(
 }
 
 export function handleRebalanceLiquidity(
+  method: string,
+  event: string,
   data: TypedMap<string, JSONValue>,
-  receipt: near.ReceiptWithOutcome,
-  methodName: string
+  receipt: near.ReceiptWithOutcome
 ): void {
-  const timestamp = receipt.block.header.timestampNanosec;
-  const receiptHash = receipt.receipt.id.toBase58();
-
   // rebalance operation is a internal operation in linear, so we don't care about the accountId
-  const increaseSharesStr = data.get('increased_amount')!.toString();
+  const increaseAmountStr = data.get('increased_amount')!.toString();
   const burnedSharesStr = data.get('burnt_stake_shares')!.toString();
   const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
-  const increasedSharesFloat = BigDecimal.fromString(increaseSharesStr);
-  let priceVersion = PriceVersion.load('price')!;
-  let lastPrice = getOrInitPrice(priceVersion.lastPriceID.toString())!;
-  let nextPrice = getOrInitPrice(priceVersion.nextPriceID.toString())!;
-  // create new price
-  nextPrice.deltaLinearAmount = burnedSharesFloat;
-  nextPrice.deltaNearAmount = increasedSharesFloat;
-  nextPrice.totalNearAmount = lastPrice.totalNearAmount.minus(increasedSharesFloat);
-  nextPrice.totalLinearAmount = lastPrice.totalLinearAmount.minus(burnedSharesFloat);
-  nextPrice.price = nextPrice.totalNearAmount.div(nextPrice.totalLinearAmount);
-  nextPrice.timeStamp = BigInt.fromU64(timestamp);
-  nextPrice.event = 'rebalance_liquidity';
-  nextPrice.method = methodName;
-  nextPrice.receiptHash = receiptHash;
-  nextPrice.save();
-  // update price version
-  priceVersion.lastPriceID = priceVersion.nextPriceID;
-  priceVersion.nextPriceID = priceVersion.nextPriceID.plus(BigInt.fromU32(1));
-  priceVersion.latestPrice = nextPrice.price;
-  priceVersion.save();
+  const increasedAmountFloat = BigDecimal.fromString(increaseAmountStr);
+
+  // update price
+  updatePrice(
+    event,
+    method,
+    receipt,
+    increasedAmountFloat.neg(),
+    burnedSharesFloat.neg()
+  );
 }

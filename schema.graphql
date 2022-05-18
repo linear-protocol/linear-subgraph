@@ -5,8 +5,6 @@ type User @entity{
    stakedNear: BigInt!
    unstakeReceivedNear: BigInt!
    firstStakingTime: BigInt!
-   transferedOut: [FtTransfer!]
-   transferedIn: [FtTransfer!]
    transferedInValue: BigDecimal!
    transferedOutValue: BigDecimal!
    transferedInShares: BigInt!
@@ -25,7 +23,7 @@ type FtTransfer @entity {
 
 type Price @entity{
    id: ID!
-   timeStamp: BigInt!
+   timestamp: BigInt!
    method: String!
    event: String!
    receiptHash: String!
@@ -36,10 +34,9 @@ type Price @entity{
    price: BigDecimal!
 }
 
-type PriceVersion @entity{
+type Status @entity{
     id: ID!
-    lastPriceID: BigInt!
-    nextPriceID: BigInt!
+    lastestPriceVersion: BigInt!
     latestPrice: BigDecimal!
 }
 
