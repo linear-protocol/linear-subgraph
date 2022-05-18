@@ -1,6 +1,10 @@
 export default {
-  "src/**/*.ts?(x)": [
+  "src/**/*.ts": [
+    () => "tsc --project tsconfig.json --alwaysStrict",
     "prettier --write",
-    "eslint --ext .ts"
+    "eslint --ext .ts --fix",
+  ],
+  "*.js": [
+    "prettier --write",
   ]
 }
