@@ -1,21 +1,20 @@
 const { BigNumber } = require('bignumber.js')
-const { client, loadContract,getSummaryFromContract } = require("./helper");
+const { client, loadContract } = require("./helper");
 const { queryLatestPriceFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./price");
 
 async function queryStakeTime(accountid) {
   const getStakeTimeQuery = `
     query {
       users (first: 1, where: {id: "${accountid}"} ){
-        id
-        firstStakingTime
+      id
+      firstStakingTime
     }
   }`
   // console.log(getStakeTimeQuery)
   let data = await client.query(getStakeTimeQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    console.log("fail to query price")
-    return
+    throw new Error("fail to query price");
   }
   const timestampInt = new Number(queryData.users[0].firstStakingTime.toString())
   const unixTimestamp = timestampInt / 1000000
@@ -43,7 +42,7 @@ async function getTransferIncome(accountID) {
     console.log("fail to query transfer event")
     return
   }
-  const latestPrice = await queryLatestPriceFromContract()
+  const latestPrice = await queryLatestPriceFromSubgraph()
   //console.log(latestPrice.price)
   const transferInShares = queryData.users[0].transferedInShares
   const tranfserInValue = queryData.users[0].transferedInValue
@@ -74,8 +73,7 @@ async function getUserIncome(accountId, flag) {
   //console.log(data)
   let queryData = data.data.users[0]
   if (queryData == null) {
-    console.log("fail to query user")
-    return
+    throw new Error("fail to query user")
   }
   const latestPrice = await queryLatestPriceFromSubgraph()
   const price1 = new BigNumber(latestPrice.price)
@@ -97,7 +95,7 @@ async function getUserIncome(accountId, flag) {
   // );
 
   if (flag) {
-    rewardFinal = reward.plus(fessPaid)
+    const rewardFinal = reward.plus(fessPaid)
     console.log("rewards [subgraph with fee] =\t\t %s NEAR", rewardFinal.div(10 ** 24).toFixed(8))
     return rewardFinal
   } else {
@@ -173,4 +171,5 @@ async function test() {
   }
 }
 
-getUserIncome("cookiemonster.near",true)
+test();
+//getUserIncome("cookiemonster.near",true)

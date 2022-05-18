@@ -12,13 +12,13 @@ const config = {
     near: {
       networkId: "mainnet",
       keyStore, // optional if not signing transactions
-      nodeUrl: process.env.NEAR_CLI_MAINNET_RPC_SERVER_URL || "https://rpc.mainnet.testnet.near.org",
+      nodeUrl: process.env.NEAR_CLI_MAINNET_RPC_SERVER_URL || "https://public-rpc.blockpi.io/http/near",
       walletUrl: "https://wallet.near.org",
       helperUrl: "https://helper.near.org",
       explorerUrl: "https://explorer.near.org",
     },
     subgraph: {
-      apiUrl: "https://api.thegraph.com/subgraphs/name/linear-protocol/linear"
+      apiUrl: "https://api.thegraph.com/subgraphs/name/ha4a4ck/linearmainnet"
     },
     contract_id: "linear-protocol.near"
   },
@@ -26,7 +26,7 @@ const config = {
     near: {
       networkId: "testnet",
       keyStore, // optional if not signing transactions
-      nodeUrl: process.env.NEAR_CLI_TESTNET_RPC_SERVER_URL || "https://rpc.testnet.near.org",
+      nodeUrl: process.env.NEAR_CLI_TESTNET_RPC_SERVER_URL || "https://public-rpc.blockpi.io/http/near-testnet",
       walletUrl: "https://wallet.testnet.near.org",
       helperUrl: "https://helper.testnet.near.org",
       explorerUrl: "https://explorer.testnet.near.org",
