@@ -16,7 +16,7 @@ async function queryStakeTime(accountid) {
   if (queryData == null) {
     throw new Error("fail to query price");
   }
-  const timestampInt = new Number(queryData.users[0].firstStakingTime.toString())
+  const timestampInt = Number(queryData.users[0].firstStakingTime.toString())
   const unixTimestamp = timestampInt / 1000000
   const date = new Date(unixTimestamp)
   console.log("user first stake time: ", date)
