@@ -5,9 +5,9 @@ const { client, loadContract } = require("./helper");
 async function queryPriceBefore(timestamp) {
   const getBeforeQuery = `
       query {
-        prices (first: 1, where: {timestamp_gt: "${timestamp}"} ){
+        prices (first: 1, where: {timeStamp_gt: "${timestamp}"} ){
           id
-          timestamp
+          timeStamp
           price
         }
       }`
@@ -15,7 +15,8 @@ async function queryPriceBefore(timestamp) {
   let data = await client.query(getBeforeQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    throw new Error("fail to query price")
+    console.log("fail to query price")
+    return
   }
   // console.log("price at %s : %s",timestamp.toString(),queryData.prices[0].price.toString())
   return queryData.prices[0]
@@ -33,9 +34,9 @@ async function queryLatestPriceFromContract() {
 async function queryLatestPriceFromSubgraph() {
   const getLatestQuery = `
       query {
-        prices (first: 1, orderBy: id, orderDirection: desc){
+        prices (first: 1, orderBy: timeStamp, orderDirection: desc){
           id
-          timestamp
+          timeStamp
           price
         }
       }
@@ -43,7 +44,8 @@ async function queryLatestPriceFromSubgraph() {
   let data = await client.query(getLatestQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    throw new Error("fail to query price")
+    console.log("fail to query price")
+    return
   }
   // console.log("current price: ",queryData.prices[0].price.toString())
   return queryData.prices[0]

@@ -1,24 +1,40 @@
-require('process');
+require('process')
 require('isomorphic-unfetch');
-const { createClient } = require('urql');
-const { connect, Contract } = require('near-api-js');
+const { BigNumber } = require('bignumber.js')
+const { createClient } = require('urql')
+const nearAPI = require('near-api-js')
+const { connect } = nearAPI
+const { keyStores } = require("near-api-js");
 
-const NETWORK = 'testnet';
-const config = require('./config')[NETWORK];
+const keyStore = new keyStores.InMemoryKeyStore();
+
+BigNumber.config({
+  DECIMAL_PLACES: 64
+})
+
+const config = {
+  networkId: "mainnet",
+  keyStore, // optional if not signing transactions
+  nodeUrl: process.env.NEAR_CLI_MAINNET_RPC_SERVER_URL || "https://public-rpc.blockpi.io/http/near",
+  walletUrl: "https://wallet.near.org",
+  helperUrl: "https://helper.near.org",
+  explorerUrl: "https://explorer.near.org",
+  subgraphUrl: "https://api.thegraph.com/subgraphs/name/ha4a4ck/linearmainnet"
+};
 
 const client = createClient({
-  url: config.subgraph.apiUrl,
+  url: config.subgraphUrl,
 })
 
 let contract = null;
 
 async function loadContract() {
-  const near = await connect(config.near);
+  const near = await connect(config);
   const account = await near.account("");
   if (!contract) {
-    contract = new Contract(
+    contract = new nearAPI.Contract(
       account, // the account object that is connecting
-      config.contract_id,
+      "linear-protocol.near",
       {
         // name of contract you're connecting to
         viewMethods: ["ft_price", "get_summary", "ft_balance_of", "get_account"], // view methods do not change state but usually return a value
@@ -33,7 +49,7 @@ async function loadContract() {
 async function getSummaryFromContract() {
   const contract = await loadContract();
   let response = await contract.get_summary();
-  //console.log(response);
+  console.log(response);
   return response
 }
 

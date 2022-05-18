@@ -7,6 +7,10 @@ type User @entity{
    firstStakingTime: BigInt!
    transferedOut: [FtTransfer!]
    transferedIn: [FtTransfer!]
+   transferedInValue: BigDecimal!
+   transferedOutValue: BigDecimal!
+   transferedInShares: BigInt!
+   transferedOutShares: BigInt!
    feesPaid: BigInt!
 }
 
@@ -15,15 +19,28 @@ type FtTransfer @entity {
     to: User!
     from: User!
     timestamp: String!
+    price: BigDecimal!
     amount: BigInt!
 }
 
 type Price @entity{
    id: ID!
-   timestamp: String!
-   linearAmount: BigDecimal!
-   nearAmount: BigDecimal!
+   timeStamp: BigInt!
+   method: String!
+   event: String!
+   receiptHash: String!
+   deltaLinearAmount: BigDecimal!
+   deltaNearAmount: BigDecimal!
+   totalLinearAmount: BigDecimal!
+   totalNearAmount: BigDecimal!
    price: BigDecimal!
+}
+
+type PriceVersion @entity{
+    id: ID!
+    lastPriceID: BigInt!
+    nextPriceID: BigInt!
+    latestPrice: BigDecimal!
 }
 
 type TotalSwapFee @entity{

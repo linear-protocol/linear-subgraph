@@ -1,6 +1,6 @@
 import { near, json, JSONValue, TypedMap } from "@graphprotocol/graph-ts";
-import { handleStake, handleUnstake } from "./stake";
-import { handleFtTransfer } from "./fungible-token";
+import { handleStake, handleUnstake,handleRebalance } from "./stake";
+import { handleFtTransfer,handleFtBurn,handleEpochUpdateRewards,handleFtMint } from "./fungible-token";
 import {
   handleInstantUnstake,
   handleLiquidityPoolSwapFee,
@@ -47,15 +47,18 @@ function handleEvent(
   if (
     (method == "stake" ||
       method == "deposit_and_stake" ||
-      method == "stake_all") &&
-    event == "stake"
+      method == "stake_all") 
   ) {
-    handleStake(data, receipt);
+    if (event == "stake") {
+      handleStake(data, receipt, method);
+    } else if (event == "rebalance_liquidity") {
+      handleRebalance(data, receipt, method);
+    }
   } else if (
     (method == "unstake" || method == "unstake_all") &&
     event == "unstake"
   ) {
-    handleUnstake(data, receipt);
+    handleUnstake(data, receipt, method);
   } else if (method == "instant_unstake" && event == "instant_unstake") {
     handleInstantUnstake(data);
   } else if (
@@ -70,5 +73,19 @@ function handleEvent(
     event == "liquidity_pool_swap_fee"
   ) {
     handleLiquidityPoolSwapFee(data, receipt);
-  }
+  } else if (
+    method == "storage_unregister" && 
+    event == "ft_burn"
+  ) {
+    handleFtBurn(data,receipt);
+  } else if (
+    (method == "epoch_update_rewards" ||
+     method ==  "validator_get_balance_callback") 
+  ) {
+    if (event == "epoch_update_rewards") {
+      handleEpochUpdateRewards(data,receipt);
+    } else if (event == "ft_mint"){
+      handleFtMint(data,receipt);
+    }
+  } 
 }

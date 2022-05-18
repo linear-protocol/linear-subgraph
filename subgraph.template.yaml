@@ -20,5 +20,6 @@ dataSources:
         - Price
         - LpApyFlag
         - FtTransfer
+        - PriceVersion
       receiptHandlers:
         - handler: handleReceipt

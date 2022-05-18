@@ -1,22 +1,23 @@
 const { BigNumber } = require('bignumber.js')
-const { client, loadContract } = require("./helper");
+const { client, loadContract,getSummaryFromContract } = require("./helper");
 const { queryLatestPriceFromContract, queryLatestPriceFromSubgraph, queryPriceBefore } = require("./price");
 
 async function queryStakeTime(accountid) {
   const getStakeTimeQuery = `
     query {
       users (first: 1, where: {id: "${accountid}"} ){
-      id
-      firstStakingTime
+        id
+        firstStakingTime
     }
   }`
   // console.log(getStakeTimeQuery)
   let data = await client.query(getStakeTimeQuery).toPromise()
   let queryData = data.data
   if (queryData == null) {
-    throw new Error("fail to query price");
+    console.log("fail to query price")
+    return
   }
-  const timestampInt = Number(queryData.users[0].firstStakingTime.toString())
+  const timestampInt = new Number(queryData.users[0].firstStakingTime.toString())
   const unixTimestamp = timestampInt / 1000000
   const date = new Date(unixTimestamp)
   console.log("user first stake time: ", date)
@@ -26,42 +27,33 @@ async function queryStakeTime(accountid) {
 async function getTransferIncome(accountID) {
   const getTransferEvent = `
     query {
-      users(first: 1, where:{id:"${accountID}"}) {
+      users(first: 1,where:{id:"${accountID}"}) {
         id
-        transferedIn {
-          amount
-          timestamp
-        }
-        transferedOut {
-          amount
-          timestamp
-        }
+        transferedInShares
+        transferedInValue
+        transferedOutShares
+        transferedOutValue
       }
   }`
   // console.log(getTransferEvent)
   let data = await client.query(getTransferEvent).toPromise()
   let queryData = data.data
-  //console.log(queryData.users[0].transferedIn)
+  //console.log(queryData.users[0])
   if (queryData == null) {
-    throw new Error("fail to query transfer event")
+    console.log("fail to query transfer event")
+    return
   }
   const latestPrice = await queryLatestPriceFromContract()
   //console.log(latestPrice.price)
-  const transferIn = queryData.users[0].transferedIn
-  const transferOut = queryData.users[0].transferedOut
-  let transferInReward = 0;
-  let transferOutReward = 0;
-  for (let i in transferIn) {
-    let tempPrice = await queryPriceBefore(transferIn[i].timestamp)
-    let tmpReward = transferIn[i].amount * (latestPrice.price - tempPrice.price)
-    transferInReward += tmpReward;
-  }
-  for (let i in transferOut) {
-    let tempPrice = await queryPriceBefore(transferOut[i].timestamp)
-    let tmpReward = transferOut[i].amount * (latestPrice.price - tempPrice.price)
-    transferOutReward += tmpReward;
-  }
-  // console.log("transfer reward: ",transferInReward - transferOutReward)
+  const transferInShares = queryData.users[0].transferedInShares
+  const tranfserInValue = queryData.users[0].transferedInValue
+  const transferOutShares = queryData.users[0].transferedOutShares
+  const tranfserOutValue = queryData.users[0].transferedOutValue
+  //console.log(transferInShares,tranfserInValue)
+  let transferInReward =  latestPrice.price * transferInShares - tranfserInValue;
+  let transferOutReward = latestPrice.price * transferOutShares - tranfserOutValue;
+  
+  console.log("transfer reward: ",transferInReward - transferOutReward)
   return transferInReward - transferOutReward
 }
 
@@ -82,7 +74,8 @@ async function getUserIncome(accountId, flag) {
   //console.log(data)
   let queryData = data.data.users[0]
   if (queryData == null) {
-    throw new Error("fail to query user")
+    console.log("fail to query user")
+    return
   }
   const latestPrice = await queryLatestPriceFromSubgraph()
   const price1 = new BigNumber(latestPrice.price)
@@ -104,7 +97,7 @@ async function getUserIncome(accountId, flag) {
   // );
 
   if (flag) {
-    const rewardFinal = reward.plus(fessPaid)
+    rewardFinal = reward.plus(fessPaid)
     console.log("rewards [subgraph with fee] =\t\t %s NEAR", rewardFinal.div(10 ** 24).toFixed(8))
     return rewardFinal
   } else {
@@ -180,4 +173,4 @@ async function test() {
   }
 }
 
-test();
+getUserIncome("cookiemonster.near",true)
