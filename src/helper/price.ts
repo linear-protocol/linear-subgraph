@@ -5,7 +5,7 @@ import { getOrInitPrice, getOrInitStatus } from './initializer';
 export function getLatestPrice(): Price | null {
   let status = Status.load('price');
   if (status != null) {
-    let price = Price.load(status.lastestPriceVersion.toString())!;
+    let price = Price.load(status.priceVersion.toString())!;
     return price as Price;
   } else {
     return null;
@@ -23,10 +23,10 @@ export function updatePrice(
   const receiptHash = receipt.receipt.id.toBase58();
 
   let status = getOrInitStatus();
-  let lastPrice = getOrInitPrice(status.lastestPriceVersion.toString())!;
+  let lastPrice = getOrInitPrice(status.priceVersion.toString());
 
   // create new price
-  const nextVersion = status.lastestPriceVersion.plus(BigInt.fromU32(1));
+  const nextVersion = status.priceVersion.plus(BigInt.fromU32(1));
   let nextPrice = new Price(nextVersion.toString());
   nextPrice.deltaNearAmount = deltaNear;
   nextPrice.deltaLinearAmount = deltaLinear;
@@ -40,7 +40,7 @@ export function updatePrice(
   nextPrice.save();
 
   // update status
-  status.lastestPriceVersion = nextVersion;
-  status.latestPrice = nextPrice.price;
+  status.priceVersion = nextVersion;
+  status.price = nextPrice.price;
   status.save();
 }

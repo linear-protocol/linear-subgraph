@@ -36,8 +36,8 @@ type Price @entity{
 
 type Status @entity{
     id: ID!
-    lastestPriceVersion: BigInt!
-    latestPrice: BigDecimal!
+    priceVersion: BigInt!
+    price: BigDecimal!
 }
 
 type TotalSwapFee @entity{

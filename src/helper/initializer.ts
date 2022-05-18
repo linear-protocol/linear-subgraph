@@ -25,15 +25,14 @@ export function getOrInitPrice(priceID: string): Price {
   let price = Price.load(priceID);
   if (!price) {
     log.info('create price {}', [priceID]);
+    const TEN_NEAR = BigDecimal.fromString('10000000000000000000000000');
     price = new Price(priceID);
     price.timestamp = BigInt.zero();
     price.deltaLinearAmount = BigDecimal.zero();
     price.deltaNearAmount = BigDecimal.zero();
     // init with 10 near and 10 linear
-    price.totalLinearAmount = BigDecimal.fromString(
-      '10000000000000000000000000'
-    );
-    price.totalNearAmount = BigDecimal.fromString('10000000000000000000000000');
+    price.totalLinearAmount = TEN_NEAR;
+    price.totalNearAmount = TEN_NEAR;
     price.event = '';
     price.method = '';
     price.price = BigDecimal.zero();
@@ -46,9 +45,9 @@ export function getOrInitPrice(priceID: string): Price {
 export function getOrInitStatus(): Status {
   let status = Status.load('status');
   if (!status) {
-    let status = new Status('status');
-    status.lastestPriceVersion = BigInt.fromString('0');
-    status.latestPrice = BigDecimal.zero();
+    status = new Status('status');
+    status.priceVersion = BigInt.zero();
+    status.price = BigDecimal.zero();
     status.save();
   }
   return status as Status;

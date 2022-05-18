@@ -25,7 +25,7 @@ export function handleFtTransfer(
   let transferedEvent = FtTransfer.load(receiptHash);
   if (!transferedEvent) {
     const status = getOrInitStatus();
-    const latestPrice = status.latestPrice;
+    const latestPrice = status.price;
     transferedEvent = new FtTransfer(receiptHash);
     transferedEvent.to = newOwnerId;
     transferedEvent.from = oldOwnerId;
