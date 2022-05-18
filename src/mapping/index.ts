@@ -34,6 +34,7 @@ function handleEvent(
   } else if (
     (method == 'ft_transfer' ||
       method == 'ft_transfer_call' ||
+      // there may be received $LiNEAR when removing liquidity
       method == 'remove_liquidity') &&
     event == 'ft_transfer'
   ) {
