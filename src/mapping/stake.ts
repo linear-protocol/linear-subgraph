@@ -4,21 +4,22 @@ import {
   JSONValue,
   TypedMap,
   BigDecimal,
-} from "@graphprotocol/graph-ts";
-import { Price } from "../../generated/schema";
-import { getOrInitUser } from "../helper/initializer";
+} from '@graphprotocol/graph-ts';
+import { getOrInitUser } from '../helper/initializer';
+import { updatePrice } from '../helper/price';
 
 export function handleStake(
+  method: string,
+  event: string,
   data: TypedMap<string, JSONValue>,
   receipt: near.ReceiptWithOutcome
 ): void {
   const timestamp = receipt.block.header.timestampNanosec;
-  const blockHeight = receipt.block.header.height;
 
   // parse event
-  const accountId = data.get("account_id")!.toString();
-  const stakeAmountStr = data.get("staked_amount")!.toString();
-  const mintedSharesStr = data.get("minted_stake_shares")!.toString();
+  const accountId = data.get('account_id')!.toString();
+  const stakeAmountStr = data.get('staked_amount')!.toString();
+  const mintedSharesStr = data.get('minted_stake_shares')!.toString();
   const stakeAmount = BigInt.fromString(stakeAmountStr);
   const mintedShares = BigInt.fromString(mintedSharesStr);
   const mintedSharesFloat = BigDecimal.fromString(mintedSharesStr);
@@ -33,26 +34,20 @@ export function handleStake(
   }
   user.save();
 
-  // create price
-  let price = new Price(blockHeight.toString());
-  price.linearAmount = mintedSharesFloat;
-  price.nearAmount = stakeAmountFloat;
-  price.timestamp = timestamp.toString();
-  price.price = stakeAmountFloat.div(mintedSharesFloat);
-  price.save();
+  // update price
+  updatePrice(event, method, receipt, stakeAmountFloat, mintedSharesFloat);
 }
 
 export function handleUnstake(
+  method: string,
+  event: string,
   data: TypedMap<string, JSONValue>,
   receipt: near.ReceiptWithOutcome
 ): void {
-  const timestamp = receipt.block.header.timestampNanosec;
-  const blockHeight = receipt.block.header.height;
-
   // parse event
-  const accountId = data.get("account_id")!.toString();
-  const unstakeAmountStr = data.get("unstaked_amount")!.toString();
-  const burnedSharesStr = data.get("burnt_stake_shares")!.toString();
+  const accountId = data.get('account_id')!.toString();
+  const unstakeAmountStr = data.get('unstaked_amount')!.toString();
+  const burnedSharesStr = data.get('burnt_stake_shares')!.toString();
   const unstakeAmount = BigInt.fromString(unstakeAmountStr);
   const burnedShares = BigInt.fromString(burnedSharesStr);
   const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
@@ -64,11 +59,12 @@ export function handleUnstake(
   user.unstakedLinear = user.unstakedLinear.plus(burnedShares);
   user.save();
 
-  // create price
-  let price = new Price(blockHeight.toString());
-  price.nearAmount = unstakeSharesFloat;
-  price.linearAmount = burnedSharesFloat;
-  price.timestamp = timestamp.toString();
-  price.price = unstakeSharesFloat.div(burnedSharesFloat);
-  price.save();
+  // update price
+  updatePrice(
+    event,
+    method,
+    receipt,
+    unstakeSharesFloat.neg(),
+    burnedSharesFloat.neg()
+  );
 }

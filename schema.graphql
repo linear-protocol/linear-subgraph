@@ -5,34 +5,46 @@ type User @entity{
    stakedNear: BigInt!
    unstakeReceivedNear: BigInt!
    firstStakingTime: BigInt!
-   transferedOut: [FtTransfer!]
-   transferedIn: [FtTransfer!]
+   transferedInValue: BigDecimal!
+   transferedOutValue: BigDecimal!
+   transferedInShares: BigInt!
+   transferedOutShares: BigInt!
    feesPaid: BigInt!
-}
-
-type FtTransfer @entity {
-    id: ID!
-    to: User!
-    from: User!
-    timestamp: String!
-    amount: BigInt!
 }
 
 type Price @entity{
    id: ID!
-   timestamp: String!
-   linearAmount: BigDecimal!
-   nearAmount: BigDecimal!
+   timestamp: BigInt!
+   method: String!
+   event: String!
+   receiptHash: String!
+   deltaLinearAmount: BigDecimal!
+   deltaNearAmount: BigDecimal!
+   totalLinearAmount: BigDecimal!
+   totalNearAmount: BigDecimal!
    price: BigDecimal!
 }
 
 type TotalSwapFee @entity{
     id: ID!
-    timestamp: String!
+    timestamp: BigInt!
     feesPaid: BigInt!
 }
 
-type Version @entity {
+# Records the latest versions and statues
+type Status @entity{
     id: ID!
-    version: Int!
+    price: BigDecimal!
+    priceVersion: BigInt!
+    totalSwapFeeVersion: BigInt!
+}
+
+# Raw NEP-297 Events
+type FtTransfer @entity {
+    id: ID!
+    to: User!
+    from: User!
+    timestamp: String!
+    price: BigDecimal!
+    amount: BigInt!
 }

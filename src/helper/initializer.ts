@@ -1,21 +1,66 @@
-
-import { BigInt, log } from "@graphprotocol/graph-ts";
-import { User } from "../../generated/schema";
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
+import { Price, User, Status, TotalSwapFee } from '../../generated/schema';
 
 export function getOrInitUser(accountId: string): User {
-    let user = User.load(accountId);
-    if (!user) {
-        log.info("create user {}", [accountId]);
-        user = new User(accountId);
-        user.firstStakingTime = BigInt.zero();
-        user.mintedLinear = BigInt.zero();
-        user.stakedNear = BigInt.zero();
-        user.unstakeReceivedNear = BigInt.zero();
-        user.unstakedLinear = BigInt.zero();
-        user.transferedIn = [];
-        user.transferedOut = [];
-        user.feesPaid = BigInt.zero();
-        user.save();
-    }
-    return user as User;
+  let user = User.load(accountId);
+  if (!user) {
+    log.info('create user {}', [accountId]);
+    user = new User(accountId);
+    user.firstStakingTime = BigInt.zero();
+    user.mintedLinear = BigInt.zero();
+    user.stakedNear = BigInt.zero();
+    user.unstakeReceivedNear = BigInt.zero();
+    user.unstakedLinear = BigInt.zero();
+    user.transferedInShares = BigInt.zero();
+    user.transferedOutShares = BigInt.zero();
+    user.transferedOutValue = BigDecimal.zero();
+    user.transferedInValue = BigDecimal.zero();
+    user.feesPaid = BigInt.zero();
+    user.save();
+  }
+  return user as User;
+}
+
+export function getOrInitPrice(priceID: string): Price {
+  let price = Price.load(priceID);
+  if (!price) {
+    log.info('create price {}', [priceID]);
+    const TEN_NEAR = BigDecimal.fromString('10000000000000000000000000');
+    price = new Price(priceID);
+    price.timestamp = BigInt.zero();
+    price.deltaLinearAmount = BigDecimal.zero();
+    price.deltaNearAmount = BigDecimal.zero();
+    // init with 10 near and 10 linear
+    price.totalLinearAmount = TEN_NEAR;
+    price.totalNearAmount = TEN_NEAR;
+    price.event = '';
+    price.method = '';
+    price.price = BigDecimal.zero();
+    price.receiptHash = '';
+    price.save();
+  }
+  return price as Price;
+}
+
+export function getOrInitStatus(): Status {
+  let status = Status.load('status');
+  if (!status) {
+    status = new Status('status');
+    status.price = BigDecimal.zero();
+    status.priceVersion = BigInt.zero();
+    status.totalSwapFeeVersion = BigInt.zero();
+    status.save();
+  }
+  return status as Status;
+}
+
+export function getOrInitTotalSwapFee(version: string): TotalSwapFee {
+  let totalSwapFee = TotalSwapFee.load(version);
+  if (!totalSwapFee) {
+    totalSwapFee = new TotalSwapFee(version);
+    totalSwapFee.timestamp = BigInt.zero();
+    totalSwapFee.feesPaid = BigInt.zero();
+    totalSwapFee.save();
+  }
+  return totalSwapFee as TotalSwapFee;
 }

@@ -3,7 +3,7 @@ require('isomorphic-unfetch');
 const { createClient } = require('urql');
 const { connect, Contract } = require('near-api-js');
 
-const NETWORK = 'testnet';
+const NETWORK = 'mainnet';
 const config = require('./config')[NETWORK];
 
 const client = createClient({

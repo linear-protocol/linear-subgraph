@@ -12,7 +12,7 @@ const config = {
     near: {
       networkId: "mainnet",
       keyStore, // optional if not signing transactions
-      nodeUrl: process.env.NEAR_CLI_MAINNET_RPC_SERVER_URL || "https://rpc.mainnet.testnet.near.org",
+      nodeUrl: process.env.NEAR_CLI_MAINNET_RPC_SERVER_URL || "https://rpc.mainnet.near.org",
       walletUrl: "https://wallet.near.org",
       helperUrl: "https://helper.near.org",
       explorerUrl: "https://explorer.near.org",
