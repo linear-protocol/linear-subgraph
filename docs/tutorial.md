@@ -22,7 +22,7 @@ Let's get started!!! :rocket:
   * [4. Querying Subgraphs](#4-querying-subgraphs)
     + [Query with Playground](#query-with-playground)
     + [Query with GraphQL Client in Code](#query-with-graphql-client-in-code)
-  * [It's time to BUIDL now!!!](#it-s-time-to-buidl-now---)
+  * [It's time to BUIDL now!!!](#its-time-to-buidl-now)
   * [About](#about)
     + [About LiNEAR](#about-linear)
     + [About The Graph](#about-the-graph)
