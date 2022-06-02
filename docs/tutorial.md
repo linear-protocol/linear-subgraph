@@ -405,7 +405,7 @@ pub fn epoch_stake(&mut self) -> bool {
 }
 ```
 
-Then we emit the epoch state result in the [callback function -- `validator_staked_callback()`](https://github.com/linear-protocol/LiNEAR/blob/2c78f26084bc8e999cea9643c0f7bf3c6aef06f5/contracts/linear/src/epoch_actions.rs#L360-L383). 
+Then we emit the epoch stake result events in the callback function -- [`validator_staked_callback()`](https://github.com/linear-protocol/LiNEAR/blob/2c78f26084bc8e999cea9643c0f7bf3c6aef06f5/contracts/linear/src/epoch_actions.rs#L360-L383). 
 
 The `EpochStakeSuccess` and `EpochStakeFailed` events are emitted only when the `epoch_stake` execution succeeded or failed, but `EpochStakeAttempt` is emitted as long as the `epoch_stake` function is executed.
 
