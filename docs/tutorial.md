@@ -2,7 +2,7 @@
 
 If you're building your DApps on [NEAR](https://near.org/) and are interested to adopt [The Graph](https://thegraph.com/) technology to empower the frontend and analytics of your project, this tutorial is exactly for you.
 
-Let's getting started!!! :rocket: 
+Let's get started!!! :rocket:
 
 ## Background
 
@@ -60,7 +60,7 @@ In the event object, the `standard`, `version` and `event` fields are required, 
 
 The Fungible Token (NEP-141) and Non-Fungible Token (NEP-171) standards have defined their standard interfaces for NEP-297 event format. 
 
-For example, a FT transfer event may look as below, when Alice transferred to both Bob and Charlie in batch.
+For example, a FT transfer event may look as below, when Alice transfers tokens to both Bob and Charlie in a batch.
 
 ```json
 EVENT_JSON:{
@@ -108,7 +108,7 @@ You're also allowed to define your own events which we'll talk about next.
 
 ## 2. Implement Events in NEAR Smart Contracts
 
-Now let's implement events in your NEAR smart contract. In this tutorial, we're building the smart contracts in Rust using NEAR Rust SDK.
+Now let's implement events in your NEAR smart contract. In this tutorial, we're building the smart contracts in Rust using [NEAR Rust SDK](https://github.com/near/near-sdk-rs).
 
 ### Events in NEAR Standard Contracts
 
@@ -568,7 +568,7 @@ receiptHandlers:
   - handler: handleReceipt
 ```
 
-In the AssemblyScript mapping file `./src/mapping/inidex.ts`, firstly we process the logs in the current receipt, and extract the event data from the logs, and pass them to `handleEvernt`.
+In the AssemblyScript mapping file `./src/mapping/index.ts`, firstly we process the logs in the current receipt, and extract the event data from the logs, and pass them to `handleEvernt`.
 
 ```typescript
 function handleAction(
