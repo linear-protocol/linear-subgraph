@@ -4,6 +4,29 @@ If you're building your DApps on [NEAR](https://near.org/) and are interested to
 
 Let's get started!!! :rocket:
 
+  * [Background](#background)
+  * [1. Introduction to Events on NEAR](#1-introduction-to-events-on-near)
+    + [NEP-297 Event Standard](#nep-297-event-standard)
+    + [Event Standards for FT and NFT](#event-standards-for-ft-and-nft)
+  * [2. Implement Events in NEAR Smart Contracts](#2-implement-events-in-near-smart-contracts)
+    + [Events in NEAR Standard Contracts](#events-in-near-standard-contracts)
+    + [Define Events for Your Contract](#define-events-for-your-contract)
+    + [Emit Events in Your Contract](#emit-events-in-your-contract)
+    + [Now the Events Data are Ready for Indexing](#now-the-events-data-are-ready-for-indexing)
+  * [3. Create Subgraphs with The Graph](#3-create-subgraphs-with-the-graph)
+    + [Set your Objectives](#set-your-objectives)
+    + [Create Manifest (`subgraph.yaml`)](#create-manifest---subgraphyaml--)
+    + [Design Schema (`schema.graphql`)](#design-schema---schemagraphql--)
+    + [Handle Events with AssemblyScript Mappings](#handle-events-with-assemblyscript-mappings)
+    + [Deploy the Subgraph](#deploy-the-subgraph)
+  * [4. Querying Subgraphs](#4-querying-subgraphs)
+    + [Query with Playground](#query-with-playground)
+    + [Query with GraphQL Client in Code](#query-with-graphql-client-in-code)
+  * [It's time to BUIDL now!!!](#it-s-time-to-buidl-now---)
+  * [About](#about)
+    + [About LiNEAR](#about-linear)
+    + [About The Graph](#about-the-graph)
+
 ## Background
 
 As the [first non-EVM blockchain](https://thegraph.com/blog/graph-near) supported by The Graph, NEAR blockchain allows developers to index data from events, actions, receipts and logs in NEAR smart contracts, and make best use of the data in their applications and analytics using The Graph. NEAR and The Graph integration utilizes StreamingFast’s Firehose interface which is a fast and scalable solution for layer one blockchain indexing.
@@ -755,7 +778,7 @@ We have at least two ways to query data:
 2. using the GraphQL client in your code
 
 
-### Query with the Playground
+### Query with Playground
 
 After deploying your subgraph and the sync is done, you'll be able to query with the playground. (e.g. LiNEAR's testnet subgraph: https://thegraph.com/hosted-service/subgraph/linear-protocol/linear-testnet)
 
