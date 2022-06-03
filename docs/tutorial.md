@@ -694,7 +694,11 @@ export function handleFtMint(
 }
 ```
 
-We can also take a look how the `updatePrice` works in [`./src/helper/price.ts`](https://github.com/linear-protocol/linear-subgraph/blob/b13779eee7c233932b1ed58090c553b75464bdb6/src/helper/price.ts#L5-L36): a new price record will be created and saved in the database, and also update the global latest price version which also keeps track of the latest total $NEAR and $LiNEAR amount. 
+We can also take a look how `updatePrice()` works in [`./src/helper/price.ts`](https://github.com/linear-protocol/linear-subgraph/blob/b13779eee7c233932b1ed58090c553b75464bdb6/src/helper/price.ts#L5-L36):
+
+1. The last Price object will be read from the Price entities by using the last price version ID saved in `Status` entity, which is a global state that tracks the latest versions of price, total swap fees, etc.;
+2. A new Price entity will be created with delta $NEAR / $LiNEAR amount, the updated total $NEAR / $LiNEAR amount, current $LiNEAR price, and other relevant info such as event name, method name, timestamp, etc., and saved into the database;
+3. Increment the latest Price version ID, and update the latest price value in the global `Status` record, which will be used in next `updatePrice()` call.
 
 ```typescript
 export function updatePrice(
