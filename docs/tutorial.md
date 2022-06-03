@@ -596,7 +596,7 @@ receiptHandlers:
   - handler: handleReceipt
 ```
 
-In the AssemblyScript mapping file `./src/mapping/index.ts`, firstly we process the logs in the current receipt, and extract the event data from the logs, and pass them to `handleEvernt`.
+In the AssemblyScript mapping file `./src/mapping/index.ts`, firstly we process the logs in the current receipt, and extract the event data from the logs, and pass them to `handleEvent`.
 
 ```typescript
 function handleAction(
