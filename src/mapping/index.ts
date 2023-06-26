@@ -1,7 +1,7 @@
 import { near, json, JSONValue, TypedMap } from '@graphprotocol/graph-ts';
 import { handleStake, handleUnstake } from './stake';
 import { handleFtTransfer, handleFtBurn, handleFtMint } from './fungible-token';
-import { handleEpochUpdateRewards } from './epoch-action';
+import { handleEpochUpdateRewards, handleSuccessfulEpochUnstake } from './epoch-action';
 import {
   handleInstantUnstake,
   handleLiquidityPoolSwapFee,
@@ -54,6 +54,10 @@ function handleEvent(
       handleEpochUpdateRewards(method, event, data, receipt);
     } else if (event == 'ft_mint') {
       handleFtMint(method, event, data, receipt);
+    }
+  } else if (method == 'validator_unstaked_callback') {
+    if (event == 'epoch_unstake_success') {
+      handleSuccessfulEpochUnstake(data, receipt);
     }
   }
 }

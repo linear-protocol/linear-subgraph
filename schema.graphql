@@ -48,3 +48,10 @@ type FtTransfer @entity {
     price: BigDecimal!
     amount: BigInt!
 }
+
+type ValidatorEpochInfo @entity {
+    id: ID!
+    epochId: String!
+    validatorId: String!
+    epochUnstakedAmount: BigInt!
+}

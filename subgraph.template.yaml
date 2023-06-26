@@ -20,5 +20,6 @@ dataSources:
         - TotalSwapFee
         - Status
         - FtTransfer
+        - ValidatorEpochInfo
       receiptHandlers:
         - handler: handleReceipt
