@@ -33,6 +33,8 @@ export function handleEpochUnstakeSuccess(
 
     entity.save();
   } else {
+    // Logic here should be redundant because one validator can only be epoch_unstake() once.
+    // But just in case, we still keep it here.
     entity.epochUnstakedAmount = entity.epochUnstakedAmount.plus(amount);
 
     entity.save();
