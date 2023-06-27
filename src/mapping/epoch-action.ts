@@ -12,7 +12,7 @@ export function handleEpochUpdateRewards(
   updatePrice(event, method, receipt, rewards, BigDecimal.zero());
 }
 
-export function handleSuccessfulEpochUnstake(
+export function handleEpochUnstakeSuccess(
   data: TypedMap<string, JSONValue>,
   receipt: near.ReceiptWithOutcome
 ): void {
