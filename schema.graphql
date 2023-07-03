@@ -61,9 +61,7 @@ type EpochCleanup @entity {
     The ID is the epoch ID
     """
     id: ID!
-
     timestamp: BigInt!
-
     stakeAmountToSettle: BigInt!
     unstakeAmountToSettle: BigInt!
 }
