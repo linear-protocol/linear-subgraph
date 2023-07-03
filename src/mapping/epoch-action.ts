@@ -58,7 +58,7 @@ export function handleEpochCleanup(
     if (!entity.stakeAmountToSettle.equals(stakeAmountToSettle) ||
         !entity.unstakeAmountToSettle.equals(unstakeAmountToSettle)
     ) {
-      throw new Error(`EpochCleanup entity already exists with different values. Receipt: ${receipt.receipt.id.toBase58()}`);
+      throw new Error(`EpochCleanup entity at epoch ${id} already exists with mismatched stake and unstake amount to settle. The receipt of the mismatched event: ${receipt.receipt.id.toBase58()}`);
     }
   } else {
     const entity = new EpochCleanup(id);
