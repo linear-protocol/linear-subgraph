@@ -1,6 +1,6 @@
 import { near, BigInt, JSONValue, TypedMap, BigDecimal } from '@graphprotocol/graph-ts';
 import { updatePrice } from '../helper/price';
-import { ValidatorEpochInfo } from '../../generated/schema';
+import { EpochCleanup, ValidatorEpochInfo } from '../../generated/schema';
 
 export function handleEpochUpdateRewards(
   method: string,
@@ -36,6 +36,36 @@ export function handleEpochUnstakeSuccess(
     // Logic here should be redundant because one validator can only be epoch_unstake() once.
     // But just in case, we still keep it here.
     entity.epochUnstakedAmount = entity.epochUnstakedAmount.plus(amount);
+
+    entity.save();
+  }
+}
+
+export function handleEpochCleanup(
+  data: TypedMap<string, JSONValue>,
+  receipt: near.ReceiptWithOutcome
+): void {
+  const timestamp = receipt.block.header.timestampNanosec;
+
+  const stakeAmountToSettle = BigInt.fromString(data.get('stake_amount_to_settle')!.toString());
+  const unstakeAmountToSettle = BigInt.fromString(data.get('unstake_amount_to_settle')!.toString());
+
+  // Use epochId as id
+  const id = receipt.block.header.epochId.toBase58();
+
+  const entity = EpochCleanup.load(id);
+  if (entity) {
+    if (!entity.stakeAmountToSettle.equals(stakeAmountToSettle) ||
+        !entity.unstakeAmountToSettle.equals(unstakeAmountToSettle)
+    ) {
+      throw new Error(`EpochCleanup entity at epoch ${id} already exists with mismatched stake and unstake amount to settle. The receipt of the mismatched event: ${receipt.receipt.id.toBase58()}`);
+    }
+  } else {
+    const entity = new EpochCleanup(id);
+
+    entity.timestamp = BigInt.fromU64(timestamp);
+    entity.stakeAmountToSettle = stakeAmountToSettle;
+    entity.unstakeAmountToSettle = unstakeAmountToSettle;
 
     entity.save();
   }
