@@ -55,11 +55,9 @@ export function handleEpochCleanup(
 
   const entity = EpochCleanup.load(id);
   if (entity) {
-    if (entity.stakeAmountToSettle.equals(stakeAmountToSettle) &&
-        entity.unstakeAmountToSettle.equals(unstakeAmountToSettle)
+    if (!entity.stakeAmountToSettle.equals(stakeAmountToSettle) ||
+        !entity.unstakeAmountToSettle.equals(unstakeAmountToSettle)
     ) {
-      // do nothing
-    } else {
       throw new Error(`EpochCleanup entity already exists with different values. Receipt: ${receipt.receipt.id.toBase58()}`);
     }
   } else {
