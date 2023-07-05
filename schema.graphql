@@ -65,3 +65,10 @@ type EpochCleanup @entity {
     stakeAmountToSettle: BigInt!
     unstakeAmountToSettle: BigInt!
 }
+
+type StakeAmountChange @entity {
+    id: ID!
+    accountId: String!
+    timestamp: BigInt!
+    amount: BigInt!
+}
