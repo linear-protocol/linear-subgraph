@@ -7,6 +7,7 @@ import {
 } from '@graphprotocol/graph-ts';
 import { getOrInitUser } from '../helper/initializer';
 import { updatePrice } from '../helper/price';
+import { addStakeAmountChange } from '../helper/stake';
 
 export function handleStake(
   method: string,
@@ -24,6 +25,13 @@ export function handleStake(
   const mintedShares = BigInt.fromString(mintedSharesStr);
   const mintedSharesFloat = BigDecimal.fromString(mintedSharesStr);
   const stakeAmountFloat = BigDecimal.fromString(stakeAmountStr);
+
+  addStakeAmountChange(
+    receipt.receipt.id.toBase58(),
+    accountId,
+    BigInt.fromU64(timestamp),
+    stakeAmount
+  );
 
   // update user
   let user = getOrInitUser(accountId);
@@ -52,6 +60,13 @@ export function handleUnstake(
   const burnedShares = BigInt.fromString(burnedSharesStr);
   const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
   const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr);
+
+  addStakeAmountChange(
+    receipt.receipt.id.toBase58(),
+    accountId,
+    BigInt.fromU64(receipt.block.header.timestampNanosec),
+    unstakeAmount.neg()
+  );
 
   // update user
   let user = getOrInitUser(accountId);
