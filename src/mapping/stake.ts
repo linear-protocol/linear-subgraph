@@ -7,20 +7,7 @@ import {
 } from '@graphprotocol/graph-ts';
 import { getOrInitUser } from '../helper/initializer';
 import { updatePrice } from '../helper/price';
-import { StakeAmountChange } from '../../generated/schema';
-
-export function addStakeAmountChange(
-  receiptId: string,
-  accountId: string,
-  timestamp: BigInt,
-  amount: BigInt
-): void {
-  const change = new StakeAmountChange(receiptId);
-  change.accountId = accountId;
-  change.timestamp = timestamp;
-  change.amount = amount;
-  change.save();
-}
+import { addStakeAmountChange } from '../helper/stake';
 
 export function handleStake(
   method: string,
