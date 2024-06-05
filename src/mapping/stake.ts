@@ -26,13 +26,6 @@ export function handleStake(
   const mintedSharesFloat = BigDecimal.fromString(mintedSharesStr);
   const stakeAmountFloat = BigDecimal.fromString(stakeAmountStr);
 
-  addStakeAmountChange(
-    receipt.receipt.id.toBase58(),
-    accountId,
-    BigInt.fromU64(timestamp),
-    stakeAmount
-  );
-
   // update user
   let user = getOrInitUser(accountId);
   user.stakedNear = user.stakedNear.plus(stakeAmount);
@@ -44,6 +37,14 @@ export function handleStake(
 
   // update price
   updatePrice(event, method, receipt, stakeAmountFloat, mintedSharesFloat);
+
+  // record stake amount change
+  addStakeAmountChange(
+    receipt.receipt.id.toBase58(),
+    accountId,
+    BigInt.fromU64(timestamp),
+    stakeAmount
+  );
 }
 
 export function handleUnstake(
@@ -61,13 +62,6 @@ export function handleUnstake(
   const burnedSharesFloat = BigDecimal.fromString(burnedSharesStr);
   const unstakeSharesFloat = BigDecimal.fromString(unstakeAmountStr);
 
-  addStakeAmountChange(
-    receipt.receipt.id.toBase58(),
-    accountId,
-    BigInt.fromU64(receipt.block.header.timestampNanosec),
-    unstakeAmount.neg()
-  );
-
   // update user
   let user = getOrInitUser(accountId);
   user.unstakeReceivedNear = user.unstakeReceivedNear.plus(unstakeAmount);
@@ -81,5 +75,13 @@ export function handleUnstake(
     receipt,
     unstakeSharesFloat.neg(),
     burnedSharesFloat.neg()
+  );
+
+  // record stake amount change
+  addStakeAmountChange(
+    receipt.receipt.id.toBase58(),
+    accountId,
+    BigInt.fromU64(receipt.block.header.timestampNanosec),
+    unstakeAmount.neg()
   );
 }
