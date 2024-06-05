@@ -8,8 +8,8 @@
     "prepare:testnet": "mustache config/testnet.json subgraph.template.yaml > subgraph.yaml",
     "codegen": "graph codegen",
     "predeploy": "npm run codegen",
-    "deploy": "env-cmd --no-override npm run deploy:hosted",
-    "deploy:hosted": "graph deploy $SLUG --product hosted-service --access-token $ACCESS_TOKEN",
+    "deploy": "env-cmd --no-override npm run deploy:studio",
+    "deploy:studio": "graph deploy --studio ${SLUG} --access-token ${ACCESS_TOKEN}",
     "deploy:mainnet": "npm run prepare:mainnet && SLUG=linear-protocol/linear npm run deploy",
     "deploy:testnet": "npm run prepare:testnet && SLUG=linear-protocol/linear-testnet npm run deploy",
     "deploy-local": "graph deploy linear --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
@@ -17,7 +17,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.23.2",
+    "@graphprotocol/graph-cli": "^0.61.0",
     "@graphprotocol/graph-ts": "^0.26.0",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
