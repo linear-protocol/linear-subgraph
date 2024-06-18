@@ -542,7 +542,7 @@ The recommended way is to define the schema based on your data queries and analy
 - **Status**: records global status such as latest version IDs of prices and total swap fees.
 
 
-The [built-in scalar types](https://thegraph.com/docs/en/developer/create-subgraph-hosted/#built-in-scalar-types) in The Graph's GraphQL API are helpful for defining the schema . 
+The [built-in scalar types](https://thegraph.com/docs/en/developing/creating-a-subgraph/#built-in-scalar-types) in The Graph's GraphQL API are helpful for defining the schema . 
 
 ![](https://i.imgur.com/kc68mnt.png)
 
