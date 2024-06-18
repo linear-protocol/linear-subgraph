@@ -577,7 +577,7 @@ type Price @entity{
 }
 ```
 
-Now we can run `npm run codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files. 
+Now we can run `yarn codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files. 
 
 
 ### Handle Events with AssemblyScript Mappings
@@ -740,11 +740,11 @@ Now that we have all the versioned prices in history, it would be easy to calcul
 
 ### Deploy the Subgraph
 
-Now we have built the subgraph. It's the time to deploy it to [The Graph's Hosted Service](https://thegraph.com/docs/en/hosted-service/deploy-subgraph-hosted/) for indexing. 
+Now we have built the subgraph. It's the time to deploy it to [The Graph's Subgraph Studio](https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-studio/) for indexing. 
 
-First, you need to create your subgraph in the [Hosted Service dashboard](https://thegraph.com/hosted-service/dashboard) by clicking "Add Subgraph" button, or just visit [this link](https://thegraph.com/hosted-service/subgraph/create?account=All%20Subgraphs). Fill in the necessary description for the subgraph will be good enough.
+First, you need to create your subgraph in the [Subgraph Studio dashboard](https://thegraph.com/studio/) by clicking "Create a Subgraph" button, or just visit [this link](https://thegraph.com/studio/?show=Create). Enter the name for the subgraph will be good enough.
 
-![](https://i.imgur.com/a0L9sNo.png)
+![](https://i.imgur.com/wp2hswQ.png)
 
 
 
@@ -755,16 +755,16 @@ Next, you can follow the steps in [README](https://github.com/linear-protocol/li
 # you can get an access token from https://thegraph.com/explorer/dashboard
 cp .env.example .env
 # install project dependencies
-npm i
+yarn
 # prepare subgraph.yaml
-npm run prepare:mainnet
+yarn prepare:mainnet
 # run codegen
-npm run codegen
+yarn codegen
 # now you're able to deploy to thegraph via
-npm run deploy
+yarn deploy
 ```
 
-After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the hosted service site (e.g. https://thegraph.com/hosted-service/subgraph/linear-protocol/linear-testnet)
+After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the Subgraph Studio site
 
 ![](https://i.imgur.com/jYfcRhp.png)
 
@@ -778,13 +778,13 @@ You'll need to [learn a bit about **GraphQL**](https://graphql.org/learn/) and [
 
 We have at least two ways to query data:
 
-1. using the playground of your subgraph;
+1. using the playground of your subgraph
 2. using the GraphQL client in your code
 
 
 ### Query with Playground
 
-After deploying your subgraph and the sync is done, you'll be able to query with the playground. (e.g. LiNEAR's testnet subgraph: https://thegraph.com/hosted-service/subgraph/linear-protocol/linear-testnet)
+After deploying your subgraph and the sync is done, you'll be able to query with the playground.
 
 ![](https://i.imgur.com/DwT6lIf.png)
 
@@ -811,7 +811,7 @@ Usually we'll query subgraph in our application frontend and analytics/statistic
 
 Here we use `urql` library as an example.
 
-(1) Get the GraphQL endpoint for our subgraph: `https://api.thegraph.com/subgraphs/name/<username>/<subgraph_name>`
+(1) Get the GraphQL endpoint for our subgraph: `https://api.studio.thegraph.com/query/<number>/<name>/<version>`
 
 (2) Create the URQL client. 
 
