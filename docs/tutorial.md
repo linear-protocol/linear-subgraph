@@ -577,7 +577,7 @@ type Price @entity{
 }
 ```
 
-Now we can run `yarn codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files. 
+Now we can run `yarn codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files.
 
 
 ### Handle Events with AssemblyScript Mappings
