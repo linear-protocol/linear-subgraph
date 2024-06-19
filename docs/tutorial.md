@@ -764,7 +764,7 @@ yarn codegen
 yarn deploy
 ```
 
-After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the Subgraph Studio site (e.g. https://thegraph.com/studio/subgraph/linear-testnet if you have deployed LiNEAR subgraph for testnet).
+After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the Subgraph Studio site (e.g. https://thegraph.com/studio/subgraph/linear if you have deployed LiNEAR subgraph for mainnet).
 
 ![](https://i.imgur.com/jYfcRhp.png)
 
@@ -784,42 +784,54 @@ We have at least two ways to query data:
 
 ### Query with Playground
 
-After deploying your subgraph and the sync is done, you'll be able to query with the playground. (e.g. LiNEAR's testnet subgraph: https://thegraph.com/studio/subgraph/linear-testnet/playground)
+After deploying your subgraph and the sync is done, you'll be able to query with the playground. (e.g. LiNEAR's mainnet subgraph: https://thegraph.com/studio/subgraph/linear/playground)
 
-![](https://i.imgur.com/DwT6lIf.png)
+![](https://i.imgur.com/ap1dxGa.png)
 
 In the playground, you can edit, save and execute your GraphQL queries. 
 
-In the above screenshot, we have queried 100 users with the fields we're interested in, such as staked NEAR and unstaked LiNEAR.
+In the above screenshot, we have queried the top 100 users who has staked the largest amount of NEAR in the history.
+
+Query:
 
 ```graphql
 {
-  users(first: 100) {
+  users (
+    first: 100,
+    orderBy: stakedNear,
+    orderDirection: desc
+  ) {
     id
-    mintedLinear
     unstakedLinear
     stakedNear
+    firstStakingTime
   }
 }
 ```
 
-Example response:
+Example Response:
 
 ```json
 {
   "data": {
     "users": [
       {
-        "id": "00266103c7ac932c360c34742ef7ea36be74534e32b6fc02c100ff11d0a9db65",
-        "mintedLinear": "263874240599470194244789",
-        "unstakedLinear": "0",
-        "stakedNear": "399999999999999999999998"
+        "id": "linear-stake-wars.sputnik-dao.near",
+        "unstakedLinear": "14527932986114632810559251236484",
+        "stakedNear": "18367600009999999999999999999967",
+        "firstStakingTime": "1671681650798360876"
       },
       {
-        "id": "00389d669d0fb708fd8f9edda225f0bf6f3a1af01181e1bbb11456c44522f4cb",
-        "mintedLinear": "558367475254372520811906",
-        "unstakedLinear": "329104809764055824130258",
-        "stakedNear": "599999999999999999999997"
+        "id": "6c7b72429c8616c52cced76562b7c0da34c1d31bb283b16c86f7236491eee5b8",
+        "unstakedLinear": "0",
+        "stakedNear": "3647469999999999999999999999985",
+        "firstStakingTime": "1694964863443998724"
+      },
+      {
+        "id": "dcc81d49b62bf89e1a07de111c32aa89fb4b6859e8bd47fa73052df9e3599244",
+        "unstakedLinear": "0",
+        "stakedNear": "3474282843109999999999999999980",
+        "firstStakingTime": "1681577057045643423"
       },
       // ...
     ]
