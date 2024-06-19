@@ -577,7 +577,7 @@ type Price @entity{
 }
 ```
 
-Now we can run `npm run codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files. 
+Now we can run `yarn codegen` in the LiNEAR subgraph project to generate the schema definitions to `./generated/schema.ts` that can be used in the mapping files.
 
 
 ### Handle Events with AssemblyScript Mappings
@@ -755,13 +755,13 @@ Next, you can follow the steps in [README](https://github.com/linear-protocol/li
 # you can get an access token from https://thegraph.com/explorer/dashboard
 cp .env.example .env
 # install project dependencies
-npm i
+yarn
 # prepare subgraph.yaml
-npm run prepare:mainnet
+yarn prepare:mainnet
 # run codegen
-npm run codegen
+yarn codegen
 # now you're able to deploy to thegraph via
-npm run deploy
+yarn deploy
 ```
 
 After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the hosted service site (e.g. https://thegraph.com/hosted-service/subgraph/linear-protocol/linear-testnet)

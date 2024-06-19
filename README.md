@@ -7,13 +7,13 @@
 # you can get an access token from https://thegraph.com/explorer/dashboard
 cp .env.example .env
 # install project dependencies
-npm i
+yarn
 # prepare subgraph.yaml
-npm run prepare:mainnet
+yarn prepare:mainnet
 # run codegen
-npm run codegen
+yarn codegen
 # now you're able to deploy to thegraph via
-npm run deploy
+yarn deploy
 ```
 
 ## Deployment
@@ -22,10 +22,10 @@ To be able to deploy to the hosted solution you will need to create a .env file 
 
 ```
 // For Testnet:
-npm run deploy:testnet
+yarn deploy:testnet
 
 // For Mainnet:
-npm run deploy:mainnet
+yarn deploy:mainnet
 ```
 
 ## Test
@@ -33,7 +33,7 @@ npm run deploy:mainnet
 To test the deployed subgraph, you can try querying with the examples.
 
 ```bash
-npm i
+yarn
 # test APY data
 node test/apy.js
 # test staking rewards data
