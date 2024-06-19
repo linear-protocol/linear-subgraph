@@ -764,7 +764,7 @@ yarn codegen
 yarn deploy
 ```
 
-After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the Subgraph Studio site
+After waiting a while (minutes to even hours, depending on how complex your mapping handler is and how long your project exists), your subgraph should be synchronized. You can always check the latest status of your subgraph in the Subgraph Studio site (e.g. https://thegraph.com/studio/subgraph/linear-testnet if you have deployed LiNEAR subgraph for testnet).
 
 ![](https://i.imgur.com/jYfcRhp.png)
 
@@ -784,13 +784,13 @@ We have at least two ways to query data:
 
 ### Query with Playground
 
-After deploying your subgraph and the sync is done, you'll be able to query with the playground.
+After deploying your subgraph and the sync is done, you'll be able to query with the playground. (e.g. LiNEAR's testnet subgraph: https://thegraph.com/studio/subgraph/linear-testnet/playground)
 
 ![](https://i.imgur.com/DwT6lIf.png)
 
 In the playground, you can edit, save and execute your GraphQL queries. 
 
-In the above screenshot, we have queried 100 users with the fields we're interested in. 
+In the above screenshot, we have queried 100 users with the fields we're interested in, such as staked NEAR and unstaked LiNEAR.
 
 ```graphql
 {
@@ -801,7 +801,30 @@ In the above screenshot, we have queried 100 users with the fields we're interes
     stakedNear
   }
 }
+```
 
+Example response:
+
+```json
+{
+  "data": {
+    "users": [
+      {
+        "id": "00266103c7ac932c360c34742ef7ea36be74534e32b6fc02c100ff11d0a9db65",
+        "mintedLinear": "263874240599470194244789",
+        "unstakedLinear": "0",
+        "stakedNear": "399999999999999999999998"
+      },
+      {
+        "id": "00389d669d0fb708fd8f9edda225f0bf6f3a1af01181e1bbb11456c44522f4cb",
+        "mintedLinear": "558367475254372520811906",
+        "unstakedLinear": "329104809764055824130258",
+        "stakedNear": "599999999999999999999997"
+      },
+      // ...
+    ]
+  }
+}
 ```
 
 
@@ -811,7 +834,7 @@ Usually we'll query subgraph in our application frontend and analytics/statistic
 
 Here we use `urql` library as an example.
 
-(1) Get the GraphQL endpoint for our subgraph: `https://api.studio.thegraph.com/query/<number>/<name>/<version>`
+(1) Get the GraphQL endpoint for our subgraph: `https://api.studio.thegraph.com/query/<user-id>/<slug>/<version>` for development or testing purpose, or `https://gateway-arbitrum.network.thegraph.com/api/[api-key]/subgraphs/id/<subgraph-id>` for production usage.
 
 (2) Create the URQL client. 
 
@@ -847,9 +870,9 @@ async function queryPriceBefore(timestamp) {
 }
 ```
 
-We can also get the latest $LiNEAR price from contract, and we already have queried the $LiNEAR price 30 days before now, we'll be able to calculate the staking rewards with the formula `(price (now) - price (30 days ago)) / 30 * 365`. We finally make it!!!
+We can also get the latest $LiNEAR price from contract, and we already have queried the $LiNEAR price 30 days before now, we'll be able to calculate the annual staking APY with the formula `(price (now) - price (30 days ago)) / 30 * 365`. We finally make it!!!
 
-*P.S.* At LiNEAR Protocol, we have built a SDK based on the subgraph queries, which is used in our frontend and analytics. Please feel free to [check out](https://github.com/linear-protocol/linear-sdk) if you're intersted to build your own SDKs.
+*P.S.* At LiNEAR Protocol, we have built a SDK based on the subgraph queries, which is used in our frontend and analytics. Please feel free to [check out](https://github.com/linear-protocol/linear-sdk) if you're interested to build your own SDKs.
 
 
 ## It's time to BUIDL now!!!
@@ -877,6 +900,6 @@ LiNEAR Protocol is a liquid staking solution built on the NEAR Protocol. LiNEAR 
 
 ### About The Graph
 
-The Graph is the indexing and query layer of web3. Developers build and publish open APIs, called subgraphs, that applications can query using GraphQL. The Graph currently supports indexing data from 31 different networks including Ethereum, NEAR, Arbitrium, Optimism, Polygon, Avalanche, Celo, Fantom, Moonbeam, IPFS, and PoA with more networks coming soon. Developers build and publish open APIs, called subgraphs, that applications can query using GraphQL.
+The Graph is the indexing and query layer of web3. Developers build and publish open APIs, called subgraphs, that applications can query using GraphQL. The Graph currently supports indexing data from 31 different networks including Ethereum, NEAR, Arbitrum, Optimism, Polygon, Avalanche, Celo, Fantom, Moonbeam, IPFS, and PoA with more networks coming soon. Developers build and publish open APIs, called subgraphs, that applications can query using GraphQL.
 
 ![](https://i.imgur.com/yZSgnsT.png)
